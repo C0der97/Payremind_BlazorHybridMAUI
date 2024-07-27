@@ -1,0 +1,74 @@
+﻿@inject NotificationService NotificationService
+@inject NotificationServiceMaui NotificationServiceMaui
+@page "/"
+@using Plugin.LocalNotification
+
+<RadzenTemplateForm TItem="NotificationData" Data="@notificationData" Submit="@SubmitForm">
+    <RadzenFieldset Text="Programar Notificación">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <RadzenLabel Text="Nombre" />
+                <RadzenTextBox @bind-Value="@notificationData.Name" Name="Name" />
+                <RadzenRequiredValidator Component="Name" Text="El nombre es requerido" />
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <RadzenLabel Text="Monto" />
+                <RadzenNumeric @bind-Value="@notificationData.Amount" Name="Amount" />
+                <RadzenRequiredValidator Component="Amount" Text="El monto es requerido" />
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <RadzenLabel Text="Fecha y Hora" />
+                <RadzenDatePicker @bind-Value="@notificationData.DateTime" Name="DateTime" ShowTime="true" />
+                <RadzenRequiredValidator Component="DateTime" Text="La fecha y hora son requeridas" />
+            </div>
+        </div>
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Programar Notificación" ButtonStyle="ButtonStyle.Primary" />
+    </RadzenFieldset>
+</RadzenTemplateForm>
+
+@code {
+    private NotificationData notificationData = new NotificationData();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
+        {
+            await LocalNotificationCenter.Current.RequestNotificationPermission();
+        }
+    }
+
+    async Task SubmitForm(NotificationData data)
+    {
+        var notification = new NotificationRequest
+            {
+                NotificationId = 100,
+                Title = data.Name,
+                Description = $"Monto: ${data.Amount:F2}",
+                Schedule =
+            {
+                NotifyTime = data.DateTime
+            }
+            };
+
+        await LocalNotificationCenter.Current.Show(notification);
+
+        NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Notificación programada",
+                Detail = $"Se ha programado una notificación para {data.Name} el {data.DateTime:g}",
+                Duration = 4000
+            });
+    }
+
+    public class NotificationData
+    {
+        public string Name { get; set; } = string.Empty;
+        public decimal Amount { get; set; } = 0;
+        public DateTime DateTime { get; set; } = DateTime.Now;
+    }
+}

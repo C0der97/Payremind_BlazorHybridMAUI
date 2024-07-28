@@ -2,6 +2,9 @@
     position: relative;
     display: flex;
     flex-direction: column;
+/*    background-image: linear-gradient(to right top, #051937, #07182f, #0a1628, #0c1420, #0d1219);*/
+/*    background-color: #171614;*/
+    color: white;
 }
 
 main {
@@ -9,8 +12,10 @@ main {
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background-image: linear-gradient(to right top, #051937, #07182f, #0a1628, #0c1420, #0d1219);
 }
+
+
 
 .top-row {
     background-color: #f7f7f7;

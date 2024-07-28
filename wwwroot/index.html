@@ -6,11 +6,43 @@
     <title>PayRemind</title>
     <base href="/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css">
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material.css">
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="PayRemind.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
+    <style type="text/css">
+        .custom-success-button {
+            background-color: #3e9108;
+            color: #c6ffaa !important; /* Color del texto */
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+/* Estilo del botón cuando se pasa el mouse por encima */
+.custom-success-button:hover {
+    background-color: darkgreen; /* Cambia el color al pasar el mouse */
+    transform: scale(1.05); /* Aumenta ligeramente el tamaño */
+}
+
+/* Estilo del botón cuando se hace clic (active) */
+.custom-success-button:active {
+    background-color: green; /* Color cuando está activo */
+    transform: scale(0.95); /* Disminuye ligeramente el tamaño */
+}
+
+/* Estilo del botón cuando está deshabilitado */
+.custom-success-button:disabled {
+    background-color: gray; /* Color del botón deshabilitado */
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+    </style>
 </head>
+
 
 <body>
 

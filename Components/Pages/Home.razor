@@ -1,7 +1,13 @@
-﻿@inject NotificationService NotificationService
+﻿@page "/"
+@inject NotificationService NotificationService
+@inject NotificationServiceBd NotificationServiceBd
 @inject NotificationServiceMaui NotificationServiceMaui
-@page "/"
+@inject SQLiteDatabaseService DatabaseService
+
+@using Maui.NullableDateTimePicker
+@using PayRemind.Shared
 @using Plugin.LocalNotification
+@using Microsoft.Extensions.DependencyInjection
 
 <RadzenTemplateForm TItem="NotificationData" Data="@notificationData" Submit="@SubmitForm">
     <RadzenFieldset Text="Programar Notificación">
@@ -20,18 +26,34 @@
             </div>
         </div>
         <div class="row mb-3">
-            <div class="col-md-4">
-                <RadzenLabel Text="Fecha y Hora" />
-                <RadzenDatePicker @bind-Value="@notificationData.DateTime" Name="DateTime" ShowTime="true" />
-                <RadzenRequiredValidator Component="DateTime" Text="La fecha y hora son requeridas" />
-            </div>
+                    <RadzenButton IsBusy=@isBusyScheduleButton Click="OpenCalendar" Icon="alarm_add" ButtonStyle="ButtonStyle.Primary" />
+                    <RadzenLabel Text="@notificationData.DateTime.ToString()" />
         </div>
-        <RadzenButton ButtonType="ButtonType.Submit" Text="Programar Notificación" ButtonStyle="ButtonStyle.Primary" />
+        @* <RadzenButton Class="custom-success-button" Variant="Variant.Flat" Shade="Shade.Darker" ButtonType="ButtonType.Submit" Text="Programar Notificación" ButtonStyle="ButtonStyle.Base" /> *@
+
+        <RadzenButton ButtonType="ButtonType.Submit" Class="custom-success-button rz-ripple" Text="Programar Notificación" Icon="add_circle" ButtonStyle="ButtonStyle.Success" />
+        
+@*         <button type="submit" class="custom-success-button rz-ripple">Programar Notificación</button> *@
+
     </RadzenFieldset>
 </RadzenTemplateForm>
 
+
 @code {
     private NotificationData notificationData = new NotificationData();
+
+    bool isBusyScheduleButton = false;
+
+    private DateTime dateNotification {get; set; } = DateTime.Now;
+
+    NullableDateTimePicker dateTimePicker = new NullableDateTimePicker();
+
+    private static void OnNullableDateTimeChanged(object sender, DateTimeChangedEventArgs e)
+    {
+        Console.WriteLine("DateTime changed!");
+        Console.WriteLine("Old DateTime: " + e.OldDateTime);
+        Console.WriteLine("New DateTime: " + e.NewDateTime);
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -39,6 +61,36 @@
         {
             await LocalNotificationCenter.Current.RequestNotificationPermission();
         }
+        dateTimePicker.NullableDateTimeChanged += OnNullableDateTimeChanged;
+
+
+    }
+
+    async Task OpenCalendar()
+    {
+        isBusyScheduleButton = true;
+        StateHasChanged();
+
+  
+             INullableDateTimePickerOptions nullableDateTimePickerOptions = new NullableDateTimePickerOptions
+                 {
+                     NullableDateTime = DateTime.Now,
+                     Mode = PickerModes.DateTime,
+                     ShowWeekNumbers = true
+                 };
+
+             var result = await NullableDateTimePicker.OpenCalendarAsync(nullableDateTimePickerOptions);
+
+             if (result is PopupResult popupResult && popupResult.ButtonResult != PopupButtons.Cancel)
+             {
+                 var MyDateTime = popupResult.NullableDateTime;
+                 dateNotification = MyDateTime ?? DateTime.Now;
+                 notificationData.DateTime = dateNotification;
+                 Console.WriteLine("Fecha: " + MyDateTime.ToString());
+             }
+
+             isBusyScheduleButton = false;
+             StateHasChanged();
     }
 
     async Task SubmitForm(NotificationData data)
@@ -48,27 +100,20 @@
                 NotificationId = 100,
                 Title = data.Name,
                 Description = $"Monto: ${data.Amount:F2}",
-                Schedule =
-            {
-                NotifyTime = data.DateTime
-            }
+                Schedule = new NotificationRequestSchedule
+                {
+                    NotifyTime = data.DateTime
+                }
             };
 
-        await LocalNotificationCenter.Current.Show(notification);
+        if (DeviceInfo.Current.DeviceType.Equals(DevicePlatform.Android))
+        {
+            await LocalNotificationCenter.Current.Show(notification);
+        }
 
-        NotificationService.Notify(new NotificationMessage
-            {
-                Severity = NotificationSeverity.Success,
-                Summary = "Notificación programada",
-                Detail = $"Se ha programado una notificación para {data.Name} el {data.DateTime:g}",
-                Duration = 4000
-            });
+        await DatabaseService.SaveNotificationAsync(data);
+
+        NotificationServiceMaui.ShowNotification(data.Name, $"Se ha programado una notificación para {data.Name} el {data.DateTime:g}");
     }
 
-    public class NotificationData
-    {
-        public string Name { get; set; } = string.Empty;
-        public decimal Amount { get; set; } = 0;
-        public DateTime DateTime { get; set; } = DateTime.Now;
-    }
 }

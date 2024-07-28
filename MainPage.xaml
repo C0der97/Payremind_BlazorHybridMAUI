@@ -1,14 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<TabbedPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:PayRemind"
+             xmlns:pages="clr-namespace:PayRemind.Components.Pages"
              x:Class="PayRemind.MainPage"
-             BackgroundColor="{DynamicResource PageBackgroundColor}">
+             BackgroundColor="{DynamicResource PageBackgroundColor}"
+             xmlns:android="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;assembly=Microsoft.Maui.Controls"
+             android:TabbedPage.ToolbarPlacement="Bottom" >
 
-    <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
-        <BlazorWebView.RootComponents>
-            <RootComponent Selector="#app" ComponentType="{x:Type local:Components.Routes}" />
-        </BlazorWebView.RootComponents>
-    </BlazorWebView>
+    <TabbedPage.Children>
 
-</ContentPage>
+
+        <ContentPage Title="Home" IconImageSource="https://i.postimg.cc/CR0qmR3z/icons8-home.png">
+            <BlazorWebView x:Name="blazorWebViewHome" HostPage="wwwroot/index.html" >
+                <BlazorWebView.RootComponents>
+                    <RootComponent Selector="#app"  ComponentType="{x:Type pages:Home}" />
+                </BlazorWebView.RootComponents>
+            </BlazorWebView>
+        </ContentPage>
+
+        <ContentPage Title="Payments" IconImageSource="https://i.postimg.cc/w7LNXXbC/ballot-7653362.png">
+            <BlazorWebView x:Name="blazorWebViewPayments" HostPage="wwwroot/index.html" StartPath="/notifications">
+                <BlazorWebView.RootComponents>
+                    <RootComponent Selector="#app"  ComponentType="{x:Type pages:Counter}" />
+                </BlazorWebView.RootComponents>
+            </BlazorWebView>
+        </ContentPage>
+    </TabbedPage.Children>
+</TabbedPage>

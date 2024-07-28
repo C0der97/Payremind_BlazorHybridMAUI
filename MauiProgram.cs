@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Maui.NullableDateTimePicker;
+using Microsoft.Extensions.Logging;
+using PayRemind.Shared;
 using Plugin.LocalNotification;
 using Radzen;
+using CommunityToolkit.Maui;
 
 namespace PayRemind
 {
@@ -8,23 +11,26 @@ namespace PayRemind
     {
         public static MauiApp CreateMauiApp()
         {
-            var builder = MauiApp.CreateBuilder();
-            builder
-                .UseMauiApp<App>()
-                .UseLocalNotification()
-                .ConfigureFonts(fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                });
+            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "notifications.db");
 
+            var builder = MauiApp.CreateBuilder();
+            builder.UseMauiApp<App>().ConfigureNullableDateTimePicker().
+                UseLocalNotification().ConfigureFonts(fonts =>
+            {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+            }).UseMauiCommunityToolkit();
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddRadzenComponents();
-
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
+
+            builder.Services.AddSingleton(new SQLiteDatabaseService(dbPath));
+
+
             builder.Services.AddSingleton<NotificationServiceMaui>();
+            builder.Services.AddSingleton<NotificationServiceBd>();
             return builder.Build();
         }
     }

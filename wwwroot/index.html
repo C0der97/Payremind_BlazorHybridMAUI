@@ -6,7 +6,7 @@
     <title>PayRemind</title>
     <base href="/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material.css">
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/default.css">
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="PayRemind.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -71,6 +71,25 @@
     <script src="_framework/blazor.webview.js" autostart="false"></script>
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
     <script src="js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.loadRadzenTheme = function (theme) {
+            var link = document.querySelector('link[href*="_content/Radzen.Blazor/css/"]');
+            if (link) {
+                link.href = `_content/Radzen.Blazor/css/${theme}.css`;
+            }
+
+            if (theme && theme.includes("dark")) {
+                document.body.style.backgroundColor = "black";
+                document.body.style.color = "white";
+            }
+        };
+
+        window.hideNotificationModal = function() {
+            var modal = new bootstrap.Modal(document.getElementById('notificationModal'));
+            modal.hide();
+        }
+    </script>
+
 </body>
 
 </html>

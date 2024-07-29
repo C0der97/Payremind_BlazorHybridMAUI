@@ -21,6 +21,16 @@
                 <Setter Property="Padding" Value="14,10" />
             </Style>
 
+
+            <Style x:Key="LightTheme" TargetType="ContentPage">
+                <Setter Property="BackgroundColor" Value="White" />
+                <!-- Otros estilos -->
+            </Style>
+            <Style x:Key="DarkTheme" TargetType="ContentPage">
+                <Setter Property="BackgroundColor" Value="Black" />
+                <!-- Otros estilos -->
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -6,7 +6,8 @@
 @inject IJSRuntime JSRuntime
 @inject DialogService DialogService
 @inject SharedStateService StateService
-
+@inject ThemeService ThemeService
+@inject IJSRuntime JS
 
 @using Maui.NullableDateTimePicker
 @using PayRemind.Shared
@@ -42,6 +43,13 @@
 </style>
 
 
+<p>
+    @foreach(var it in @Themes.Free)
+    {
+        <strong>@it.Value</strong>
+        <br>
+    }
+</p>
 
 
 <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
@@ -103,7 +111,7 @@
     @foreach (var item in Items)
     {
         <div class="swipe-item rz-shadow-1 rz-mb-2" @ref="item.ElementReference" @ontouchstart="@(e => TouchStart(e, item))" @ontouchmove="@(e => TouchMove(e, item))" @ontouchend="@(e => TouchEnd(item))">
-            <RadzenCard class="rz-background-color-white">
+            <RadzenCard>
                 <h3>@item.Title</h3>
                 <h5>@item.DateNotification</h5>
                 @if (item.IsPaid)
@@ -177,6 +185,9 @@
 
 
 @code {
+
+    AppTheme currentTheme = Application.Current.RequestedTheme;
+
     private NotificationData notificationData = new NotificationData();
 
     private List<NotificationData> notifications = new();
@@ -221,6 +232,19 @@
 
     protected override async Task OnInitializedAsync()
     {
+        string theme = "";
+
+        if (currentTheme == AppTheme.Light)
+        {
+            theme = "material";
+        }
+        else
+        {
+            theme = "material-dark";
+        }
+
+        await JS.InvokeVoidAsync("loadRadzenTheme", theme);
+
         if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
         {
             await LocalNotificationCenter.Current.RequestNotificationPermission();
@@ -230,6 +254,9 @@
         notifications = await DatabaseService.GetNotificationsAsync();
 
         ReloadItems();
+
+        ThemeService.SetTheme("material-dark");
+
 
     }
 
@@ -312,7 +339,7 @@
     private async Task HandleValidSubmit()
     {
         await SubmitForm();
-        await JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('notificationModal')).hide()");
+        await JSRuntime.InvokeVoidAsync("hideNotificationModal");
 
     }
 
@@ -438,6 +465,5 @@
         await DatabaseService.DeleteNotificationAsync(notification);
         Items.Remove(item);
         StateHasChanged();
-    }
-    
+    }    
 }

@@ -5,6 +5,7 @@
 @inject SQLiteDatabaseService DatabaseService
 @inject SharedStateService StateService
 @implements IDisposable
+@inject IJSRuntime JS
 
 
 @namespace PayRemind.Components.Pages
@@ -17,7 +18,7 @@
     @foreach (var item in notifications)
     {
         <div class="swipe-item rz-shadow-1 rz-mb-2">
-            <RadzenCard class="rz-background-color-white">
+            <RadzenCard>
                 <h3>@item.Name</h3>
                 <h5>@item.DateTime.ToString("yyyy-MM-dd hh:mm tt")</h5>
                 @if (item.IsPaid)
@@ -36,6 +37,10 @@
 
 
 @code {
+
+    AppTheme currentTheme = Application.Current.RequestedTheme;
+
+
     private List<NotificationData> notifications = new();
     private NotificationData selectedNotification = new();
     private bool? checkBoxValue;
@@ -43,6 +48,20 @@
 
     protected override async Task OnInitializedAsync()
     {
+
+        string theme = "";
+
+        if (currentTheme == AppTheme.Light)
+        {
+            theme = "material";
+        }
+        else
+        {
+            theme = "material-dark";
+        }
+
+        await JS.InvokeVoidAsync("loadRadzenTheme", theme);
+
         await ReloadData();
         StateService.OnChange += StateHasChangedData;
     }

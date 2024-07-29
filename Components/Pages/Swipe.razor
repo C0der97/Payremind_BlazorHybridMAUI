@@ -1,0 +1,110 @@
+﻿@page "/swipe"
+@inject IJSRuntime JSRuntime
+@using Radzen
+@using Radzen.Blazor
+
+<style>
+    .swipe-item {
+        position: relative;
+        overflow: hidden;
+        touch-action: pan-y;
+    }
+
+    .swipe-actions {
+        position: absolute;
+        right: -150px;
+        top: 0;
+        height: 100%;
+        display: flex;
+        transition: transform 0.3s ease;
+    }
+
+    .swipe-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 75px;
+        height: 100%;
+        color: white;
+    }
+</style>
+
+<div class="rz-p-4">
+    @foreach (var item in Items)
+    {
+        <div class="swipe-item rz-shadow-1 rz-mb-2" @ref="item.ElementReference" @ontouchstart="@(e => TouchStart(e, item))" @ontouchmove="@(e => TouchMove(e, item))" @ontouchend="@(e => TouchEnd(item))">
+            <RadzenCard class="rz-background-color-white">
+                <h3>@item.Title</h3>
+                <p>@item.Description</p>
+            </RadzenCard>
+            <div class="swipe-actions">
+                <div class="swipe-action rz-background-color-info" @onclick="() => EditItem(item)">
+                    <RadzenIcon Icon="edit" />
+                </div>
+                <div class="swipe-action rz-background-color-danger" @onclick="() => DeleteItem(item)">
+                    <RadzenIcon Icon="delete" />
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<SwipeItem> Items = new List<SwipeItem>();
+
+    protected override void OnInitialized()
+    {
+        for (int i = 1; i <= 5; i++)
+        {
+            Items.Add(new SwipeItem
+                {
+                    Id = i,
+                    Title = $"Item {i}",
+                    Description = $"Description for item {i}"
+                });
+        }
+    }
+
+    private async Task TouchStart(TouchEventArgs e, SwipeItem item)
+    {
+        item.StartX = e.Touches[0].ClientX;
+    }
+
+    private async Task TouchMove(TouchEventArgs e, SwipeItem item)
+    {
+        var currentX = e.Touches[0].ClientX;
+        var diff = item.StartX - currentX;
+
+        if (diff > 0 && diff <= 150)
+        {
+            await JSRuntime.InvokeVoidAsync("eval", $"document.querySelector('[_bl_{item.ElementReference.Id}] .swipe-actions').style.transform = 'translateX(-{diff}px)'");
+        }
+    }
+
+    private async Task TouchEnd(SwipeItem item)
+    {
+        await JSRuntime.InvokeVoidAsync("eval", $"document.querySelector('[_bl_{item.ElementReference.Id}] .swipe-actions').style.transform = 'translateX(-150px)'");
+    }
+
+    private void EditItem(SwipeItem item)
+    {
+        // Lógica para editar el item
+        Console.WriteLine($"Editando item {item.Id}");
+    }
+
+    private void DeleteItem(SwipeItem item)
+    {
+        // Lógica para eliminar el item
+        Items.Remove(item);
+        StateHasChanged();
+    }
+
+    public class SwipeItem
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public ElementReference ElementReference { get; set; }
+        public double StartX { get; set; }
+    }
+}

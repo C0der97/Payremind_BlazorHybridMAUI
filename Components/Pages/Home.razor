@@ -25,18 +25,27 @@
                 <RadzenRequiredValidator Component="Amount" Text="El monto es requerido" />
             </div>
         </div>
-        <div class="row mb-3">
-                    <RadzenButton IsBusy=@isBusyScheduleButton Click="OpenCalendar" Icon="alarm_add" ButtonStyle="ButtonStyle.Primary" />
-                    <RadzenLabel Text="@notificationData.DateTime.ToString()" />
+        <div class="row mb-3 p-4">
+            <RadzenButton class="col-1" IsBusy=@isBusyScheduleButton Click="OpenCalendar" Icon="alarm_add" ButtonStyle="ButtonStyle.Dark" />
+            &nbsp;&nbsp; <RadzenLabel class="col-9 ml-2" Text="@notificationData.DateTime.ToString("yyyy/MM/dd HH:mm")" />
         </div>
         @* <RadzenButton Class="custom-success-button" Variant="Variant.Flat" Shade="Shade.Darker" ButtonType="ButtonType.Submit" Text="Programar Notificación" ButtonStyle="ButtonStyle.Base" /> *@
 
-        <RadzenButton ButtonType="ButtonType.Submit" Class="custom-success-button rz-ripple" Text="Programar Notificación" Icon="add_circle" ButtonStyle="ButtonStyle.Success" />
+        <RadzenButton ButtonType="ButtonType.Submit" Class="custom-success-button rz-ripple" Text="Programar Notificación" Icon="add_circle" ButtonStyle="ButtonStyle.Primary" />
         
 @*         <button type="submit" class="custom-success-button rz-ripple">Programar Notificación</button> *@
 
     </RadzenFieldset>
 </RadzenTemplateForm>
+
+<div class="rz-p-12">
+    <RadzenButton
+                  ButtonStyle="ButtonStyle.Success"
+                  Icon="add"
+                  class="rz-border-radius-circle rz-shadow-8"
+                  Style="position: fixed; right: 2rem; bottom: 2rem; padding: 1rem;">
+    </RadzenButton>
+</div>
 
 
 @code {
@@ -71,49 +80,55 @@
         isBusyScheduleButton = true;
         StateHasChanged();
 
-  
-             INullableDateTimePickerOptions nullableDateTimePickerOptions = new NullableDateTimePickerOptions
+
+        INullableDateTimePickerOptions nullableDateTimePickerOptions = new NullableDateTimePickerOptions
                  {
                      NullableDateTime = DateTime.Now,
                      Mode = PickerModes.DateTime,
                      ShowWeekNumbers = true
                  };
 
-             var result = await NullableDateTimePicker.OpenCalendarAsync(nullableDateTimePickerOptions);
+        var result = await NullableDateTimePicker.OpenCalendarAsync(nullableDateTimePickerOptions);
 
-             if (result is PopupResult popupResult && popupResult.ButtonResult != PopupButtons.Cancel)
-             {
-                 var MyDateTime = popupResult.NullableDateTime;
-                 dateNotification = MyDateTime ?? DateTime.Now;
-                 notificationData.DateTime = dateNotification;
-                 Console.WriteLine("Fecha: " + MyDateTime.ToString());
-             }
+        if (result is PopupResult popupResult && popupResult.ButtonResult != PopupButtons.Cancel)
+        {
+            var MyDateTime = popupResult.NullableDateTime;
+            dateNotification = MyDateTime ?? DateTime.Now;
+            notificationData.DateTime = dateNotification;
+            Console.WriteLine("Fecha: " + MyDateTime.ToString());
+        }
 
-             isBusyScheduleButton = false;
-             StateHasChanged();
+        isBusyScheduleButton = false;
+        StateHasChanged();
     }
 
     async Task SubmitForm(NotificationData data)
     {
+        Random rnd = new Random();
+
         var notification = new NotificationRequest
             {
-                NotificationId = 100,
-                Title = data.Name,
-                Description = $"Monto: ${data.Amount:F2}",
+                NotificationId = rnd.Next(),
+                Title = "Recordatorio de pago: " + data.Name,
+                Description = $"Por Monto de: ${data.Amount:F2}",
                 Schedule = new NotificationRequestSchedule
                 {
                     NotifyTime = data.DateTime
                 }
+                ,
+                Group = "Reminders",
+                CategoryType = NotificationCategoryType.Reminder
+               
             };
 
-        if (DeviceInfo.Current.DeviceType.Equals(DevicePlatform.Android))
+        if (DeviceInfo.Current.Platform == DevicePlatform.Android)
         {
             await LocalNotificationCenter.Current.Show(notification);
         }
 
         await DatabaseService.SaveNotificationAsync(data);
 
-        NotificationServiceMaui.ShowNotification(data.Name, $"Se ha programado una notificación para {data.Name} el {data.DateTime:g}");
+        NotificationServiceMaui.ShowNotification(data.Name, $"Se ha programado un recordatorio de {data.Name} para el {data.DateTime:g}");
     }
 
 }

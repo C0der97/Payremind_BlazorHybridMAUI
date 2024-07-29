@@ -12,7 +12,7 @@
     <TabbedPage.Children>
 
 
-        <ContentPage Title="Home" IconImageSource="https://i.postimg.cc/CR0qmR3z/icons8-home.png">
+        <ContentPage Title="Recordatorios" IconImageSource="reloj.png">
 
             <ScrollView>
                 <BlazorWebView x:Name="blazorWebViewHome" HostPage="wwwroot/index.html" >
@@ -27,35 +27,13 @@
 
         </ContentPage>
 
-        <ContentPage Title="Payments" IconImageSource="https://i.postimg.cc/w7LNXXbC/ballot-7653362.png">
+        <ContentPage Title="Historico" IconImageSource="lista.png">
             <BlazorWebView x:Name="blazorWebViewPayments" HostPage="wwwroot/index.html" StartPath="/notifications">
                 <BlazorWebView.RootComponents>
                     <RootComponent Selector="#app"  ComponentType="{x:Type pages:Notifications}" />
                 </BlazorWebView.RootComponents>
             </BlazorWebView>
         </ContentPage>
-
-
-
-        <ContentPage Title="Swipe">
-            <BlazorWebView x:Name="blazorWebViewSwipe" HostPage="wwwroot/index.html" StartPath="/swipe">
-                <BlazorWebView.RootComponents>
-                    <RootComponent Selector="#app"  ComponentType="{x:Type pages:Swipe}" />
-                </BlazorWebView.RootComponents>
-            </BlazorWebView>
-        </ContentPage>
-
-        <ContentPage Title="Picker">
-            <StackLayout>
-                <DatePicker x:Name="myDatePicker" 
-            Format="D"
-            DateSelected="OnDateSelected"></DatePicker>
-                <TimePicker x:Name="timePicker"
-                    Format="T"
-                    PropertyChanged="OnTimeChanged"/>
-                <Label x:Name="selectedDateTime" />
-            </StackLayout>
-
-        </ContentPage>
+        
     </TabbedPage.Children>
 </TabbedPage>

@@ -7,8 +7,8 @@
         public MainPage()
         {
             InitializeComponent();
-            myDatePicker.MinimumDate = new DateTime(2000, 1, 1);
-            myDatePicker.MaximumDate = DateTime.Today;
+            //myDatePicker.MinimumDate = new DateTime(2000, 1, 1);
+            //myDatePicker.MaximumDate = DateTime.Today;
         }
 
         private void OnDateSelected(object sender, DateChangedEventArgs e)
@@ -22,14 +22,14 @@
         {
             if (e.PropertyName == "Time")
             {
-                _selectedDateTime = _selectedDateTime.Date + timePicker.Time;
+                //_selectedDateTime = _selectedDateTime.Date + timePicker.Time;
                 UpdateDateTimeLabel();
             }
         }
 
         private void UpdateDateTimeLabel()
         {
-            selectedDateTime.Text = $"Selected: {_selectedDateTime:g}";
+            //selectedDateTime.Text = $"Selected: {_selectedDateTime:g}";
         }
     }
 }

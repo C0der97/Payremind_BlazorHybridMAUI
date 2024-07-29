@@ -60,6 +60,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Remove="Resources\Images\lista.png" />
+      <None Remove="Resources\Images\reloj.png" />
       <None Remove="Resources\Splash\splash.png" />
       <None Remove="Resources\Splash\splash.svg" />
     </ItemGroup>
@@ -83,7 +85,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Resources\Images\" />
       <Folder Include="wwwroot\NewFolder\" />
     </ItemGroup>
 

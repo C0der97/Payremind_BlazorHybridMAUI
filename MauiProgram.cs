@@ -31,6 +31,7 @@ namespace PayRemind
 
             builder.Services.AddSingleton<NotificationServiceMaui>();
             builder.Services.AddSingleton<NotificationServiceBd>();
+            builder.Services.AddSingleton<SharedStateService>();
             return builder.Build();
         }
     }

@@ -4,12 +4,44 @@
 @inject NotificationServiceMaui NotificationServiceMaui
 @inject SQLiteDatabaseService DatabaseService
 @inject IJSRuntime JSRuntime
+@inject DialogService DialogService
+@inject SharedStateService StateService
 
 
 @using Maui.NullableDateTimePicker
 @using PayRemind.Shared
 @using Plugin.LocalNotification
 @using Microsoft.Extensions.DependencyInjection
+
+
+
+<style>
+    .swipe-item {
+        position: relative;
+        overflow: hidden;
+        touch-action: pan-y;
+    }
+
+    .swipe-actions {
+        position: absolute;
+        right: -150px;
+        top: 0;
+        height: 100%;
+        display: flex;
+        transition: transform 0.3s ease;
+    }
+
+    .swipe-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 100%;
+        color: white;
+    }
+</style>
+
+
 
 
 <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
@@ -20,40 +52,117 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <EditForm Model="@notificationData" OnValidSubmit="HandleValidSubmit">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
+                <div class="rz-p-0 rz-p-md-12">
+                    <EditForm Model="@notificationData" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
 
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Nombre</label>
-                        <InputText id="name" class="form-control" @bind-Value="notificationData.Name" />
-                        <ValidationMessage For="@(() => notificationData.Name)" />
-                    </div>
+                        <RadzenRow Gap="1rem">
+                            <RadzenColumn Size="12" SizeSM="6">
+                                <RadzenStack>
+                                    <RadzenFormField Text="Nombre" Variant="Variant.Outlined">
+                                        <RadzenTextBox @bind-Value="notificationData.Name" />
+                                    </RadzenFormField>
+                                    <ValidationMessage For="@(() => notificationData.Name)" />
 
-                    <div class="mb-3">
-                        <label for="amount" class="form-label">Monto</label>
-                        <InputNumber id="amount" class="form-control" @bind-Value="notificationData.Amount" />
-                        <ValidationMessage For="@(() => notificationData.Amount)" />
-                    </div>
+                                    <RadzenFormField Text="Monto" Variant="Variant.Outlined">
+                                        <RadzenNumeric  @bind-Value="notificationData.Amount" />
+                                    </RadzenFormField>
+@*                                     <RadzenFormField Text="Fecha" Variant="Variant.Outlined">
+                                        <ChildContent>
+                                            <RadzenDatePicker @bind-Value="@valueData" />
+                                        </ChildContent>
+                                        <End>
+                                        </End>
+                                    </RadzenFormField> *@
+                                    <div class="mb-3">
+                                        <label for="datePart" class="form-label">Fecha</label>
+                                        <InputDate id="datePart" class="form-control" @bind-Value="datePart" />
+                                        <ValidationMessage For="@(() => datePart)" />
+                                    </div>
 
-                    <div class="mb-3">
-                        <label for="datePart" class="form-label">Fecha</label>
-                        <InputDate id="datePart" class="form-control" @bind-Value="datePart" />
-                        <ValidationMessage For="@(() => datePart)" />
-                    </div>
+                                    <div class="mb-3">
+                                        <label for="timePart" class="form-label">Hora</label>
+                                        <input id="timePart" type="time" class="form-control" @oninput="UpdateTimePart" />
+                                        <ValidationMessage For="@(() => timePart)" />
+                                    </div>
 
-                    <div class="mb-3">
-                        <label for="timePart" class="form-label">Hora</label>
-                        <input id="timePart" type="time" class="form-control" @oninput="UpdateTimePart" />
-                        <ValidationMessage For="@(() => timePart)" />
-                    </div>
+                                    <RadzenButton ButtonType="ButtonType.Submit" Class="custom-success-button rz-ripple" Text="Programar" Icon="add_circle" ButtonStyle="ButtonStyle.Primary" />
 
-                    <RadzenButton ButtonType="ButtonType.Submit" Class="custom-success-button rz-ripple" Text="Programar" Icon="add_circle" ButtonStyle="ButtonStyle.Primary" />
-                </EditForm>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </EditForm>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<div class="rz-p-4">
+    @foreach (var item in Items)
+    {
+        <div class="swipe-item rz-shadow-1 rz-mb-2" @ref="item.ElementReference" @ontouchstart="@(e => TouchStart(e, item))" @ontouchmove="@(e => TouchMove(e, item))" @ontouchend="@(e => TouchEnd(item))">
+            <RadzenCard class="rz-background-color-white">
+                <h3>@item.Title</h3>
+                <h5>@item.DateNotification</h5>
+                @if (item.IsPaid)
+                {
+                    <h5>Estado: <strong>Pagado</strong> </h5>
+                }
+                else
+                {
+                    <h5>Estado: <strong>Sin Pagar</strong> </h5>
+                }
+            </RadzenCard>
+
+            @if (!item.IsPaid)
+            {
+
+                <div class="swipe-actions">
+                    <div class="swipe-action">
+                        <RadzenButton @onclick="() => EditItem(item)"
+                                      ButtonStyle="ButtonStyle.Info"
+                                      Icon="edit"
+                                      class="rz-border-radius-circle rz-shadow-8"
+                                      Style="padding: 1rem;border-radius: 50%">
+                        </RadzenButton>
+                    </div>
+
+                    <div class="swipe-action">
+                        <RadzenButton Click="() => RescheduleNotification(item)"
+                                      ButtonStyle="ButtonStyle.Light"
+                                      Icon="cached"
+                                      class="rz-border-radius-circle rz-shadow-8"
+                                      Style="padding: 1rem;border-radius: 50%">
+                        </RadzenButton>
+                    </div>
+
+                    <div class="swipe-action">
+                        <RadzenButton Click="() => MarAsPayed(item)"
+                                      ButtonStyle="ButtonStyle.Success"
+                                      Icon="done"
+                                      class="rz-border-radius-circle rz-shadow-8"
+                                      Style="padding: 1rem;border-radius: 50%">
+                        </RadzenButton>
+                    </div>
+
+                    <div class="swipe-action">
+                        <RadzenButton Click="() => DeleteItem(item)"
+                                      ButtonStyle="ButtonStyle.Danger"
+                                      Icon="delete"
+                                      class="rz-border-radius-circle rz-shadow-8"
+                                      Style="padding: 1rem;border-radius: 50%">
+                        </RadzenButton>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+
+
 
 <div class="rz-p-12">
     <RadzenButton Click="ShowModal"
@@ -66,8 +175,23 @@
 </div>
 
 
+
 @code {
     private NotificationData notificationData = new NotificationData();
+
+    private List<NotificationData> notifications = new();
+    private NotificationData selectedNotification = new();
+    private List<SwipeItemNotification> Items = new List<SwipeItemNotification>();
+
+
+    string value = "Text";
+    DateTime valueData = DateTime.Now;
+    int intValue = 123;
+    int radioButtonValue = 1;
+    string dropDownValue = "Around the Horn";
+    string dropDownDataGridValue = "";
+    string autoCompleteValue = "";
+    string color = "rgb(68, 58, 110)";
 
     bool isBusyScheduleButton = false;
 
@@ -102,7 +226,30 @@
             await LocalNotificationCenter.Current.RequestNotificationPermission();
         }
         dateTimePicker.NullableDateTimeChanged += OnNullableDateTimeChanged;
+
+        notifications = await DatabaseService.GetNotificationsAsync();
+
+        ReloadItems();
+
     }
+
+    void ReloadItems()
+    {
+        Items.Clear();
+
+        foreach (var not in notifications)
+        {
+
+            Items.Add(new SwipeItemNotification
+                {
+                    Id = not.Id,
+                    Title = not.Name,
+                    IsPaid = not.IsPaid,
+                    DateNotification = not.DateTime.ToString("yyyy-MM-dd hh:mm tt")
+                });
+        }
+    }
+
 
     async Task OpenCalendar()
     {
@@ -155,6 +302,10 @@
 
         await DatabaseService.SaveNotificationAsync(notificationData, false);
 
+        notifications = await DatabaseService.GetNotificationsAsync();
+
+        ReloadItems();
+
         NotificationServiceMaui.ShowNotification(notificationData.Name, $"Se ha programado un recordatorio de {notificationData.Name} para el {notificationData.DateTime:g}");
     }
 
@@ -174,4 +325,119 @@
     {
         timePartString = e.Value.ToString();
     }
+
+    async Task<bool> MarAsPayed(SwipeItemNotification item)
+    {
+        selectedNotification = notifications.Where((x) => x.Id == item.Id).FirstOrDefault() ?? new NotificationData();
+
+
+        // var result = await DialogService.OpenAsync<ConfirmDialog>("Confirmación", new Dictionary<string, object> {
+        //     { "Notification", notification }
+        // });
+
+        bool answer = await Application.Current.MainPage.DisplayAlert("Confirmación", "¿Estás seguro que deseas realizar esta acción?", "Sí", "No");
+
+        if (answer == true)
+        {
+            selectedNotification.IsPaid = true;
+
+            await DatabaseService.SaveNotificationAsync(selectedNotification, true);
+
+            notifications = await DatabaseService.GetNotificationsAsync();
+
+            StateService.NotifyStateChanged();
+
+            ReloadItems();
+
+        }
+
+        return await Task.FromResult(true);
+    }
+
+    async Task<bool> RescheduleNotification(SwipeItemNotification item)
+    {
+        selectedNotification = notifications.Where((x) => x.Id == item.Id).FirstOrDefault() ?? new NotificationData();
+
+        // var result = await DialogService.OpenAsync<ConfirmDialog>("Confirmación", new Dictionary<string, object> {
+        //     { "Notification", notification }
+        // });
+
+        bool answer = await Application.Current.MainPage.DisplayAlert("Confirmación", "¿Estás seguro que deseas realizar esta acción?", "Sí", "No");
+
+        if (answer == true)
+        {
+            // Si el usuario confirma, programamos una nueva notificación para el próximo mes
+            selectedNotification.IsPaid = false;
+            selectedNotification.DateTime = selectedNotification.DateTime.AddDays(30);
+            selectedNotification.Id = 0;
+
+            int result = await DatabaseService.SaveNotificationAsync(selectedNotification, false);
+
+            notifications = await DatabaseService.GetNotificationsAsync();
+
+            StateService.NotifyStateChanged();
+
+
+            ReloadItems();
+        }
+
+
+
+        return await Task.FromResult(true);
+    }
+
+
+
+
+    private async Task TouchStart(TouchEventArgs e, SwipeItemNotification item)
+    {
+        if (!item.IsPaid)
+        {
+            item.StartX = e.Touches[0].ClientX;
+        }
+
+    }
+
+    private async Task TouchMove(TouchEventArgs e, SwipeItemNotification item)
+    {
+        if (!item.IsPaid)
+        {
+            var currentX = e.Touches[0].ClientX;
+            var diff = item.StartX - currentX;
+
+            if (diff > 0 && diff <= 200)
+            {
+                await JSRuntime.InvokeVoidAsync("eval", $"document.querySelector('[_bl_{item.ElementReference.Id}] .swipe-actions').style.transform = 'translateX(-{diff}px)'");
+            }
+
+        }
+    }
+
+    private async Task TouchEnd(SwipeItemNotification item)
+    {
+        if (!item.IsPaid)
+        {
+            await JSRuntime.InvokeVoidAsync("eval", $"document.querySelector('[_bl_{item.ElementReference.Id}] .swipe-actions').style.transform = 'translateX(-150px)'");
+
+        }
+    }
+
+    private void EditItem(SwipeItemNotification item)
+    {
+        // Lógica para editar el item
+        Console.WriteLine($"Editando item {item.Id}");
+    }
+
+    private async Task DeleteItem(SwipeItemNotification item)
+    {
+        var notification = new NotificationData()
+            {
+                Id = item.Id
+            };
+
+        await DatabaseService.DeleteNotificationAsync(notification);
+        Items.Remove(item);
+        StateHasChanged();
+    }
+    
 }

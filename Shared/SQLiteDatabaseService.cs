@@ -10,9 +10,9 @@ public class SQLiteDatabaseService
         _database.CreateTableAsync<NotificationData>().Wait();
     }
 
-    public async Task<List<NotificationData>> GetNotificationsAsync()
+    public async Task<List<NotificationData>> GetNotificationsAsync(bool isPaid = false)
     {
-        return await _database.Table<NotificationData>().ToListAsync();
+        return await _database.Table<NotificationData>().Where(n => n.IsPaid == isPaid).ToListAsync();
     }
 
     public async Task<int> SaveNotificationAsync(NotificationData notification,bool Updating)

@@ -2,70 +2,24 @@
 @using PayRemind.Shared
 @using static PayRemind.Components.Pages.Home
 @inject NotificationServiceBd NotificationServiceBd
-@inject DialogService DialogService
 @inject SQLiteDatabaseService DatabaseService
-@inject IJSRuntime JSRuntime
+@inject SharedStateService StateService
+@implements IDisposable
 
 
 @namespace PayRemind.Components.Pages
 
-<style>
-    .swipe-item {
-        position: relative;
-        overflow: hidden;
-        touch-action: pan-y;
-    }
 
-    .swipe-actions {
-        position: absolute;
-        right: -150px;
-        top: 0;
-        height: 100%;
-        display: flex;
-        transition: transform 0.3s ease;
-    }
+<h3 class="text-center">Lista de Notificaciones Pagadas</h3>
 
-    .swipe-action {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 50px;
-        height: 100%;
-        color: white;
-    }
-</style>
-
-
-<h3>Lista de Notificaciones Programadas</h3>
-
-<RadzenDataList WrapItems="true" AllowPaging="true" Data="@notifications" TItem="NotificationData">
-    <Template Context="notification">
-@*         <div style="color: black">
-            <strong>Nombre:</strong> @notification.Name<br />
-            <strong>Monto:</strong> @notification.Amount<br />
-            <strong>Fecha y Hora:</strong> @notification.DateTime<br />
-            @if (!notification.IsPaid)
-            {
-                <button @onclick="@(args => OnChange(notification))" type="button" class="custom-success-button rz-ripple">Marcar como pagado</button>
-            }
-            else
-            {
-                <strong>Estado: Pago</strong>
-            }
-        </div> *@
-
-        
-
-    </Template>
-</RadzenDataList>
 
 <div class="rz-p-4">
-    @foreach (var item in Items)
+    @foreach (var item in notifications)
     {
-        <div class="swipe-item rz-shadow-1 rz-mb-2" @ref="item.ElementReference" @ontouchstart="@(e => TouchStart(e, item))" @ontouchmove="@(e => TouchMove(e, item))" @ontouchend="@(e => TouchEnd(item))">
+        <div class="swipe-item rz-shadow-1 rz-mb-2">
             <RadzenCard class="rz-background-color-white">
-                <h3>@item.Title</h3>
-                <h5>@item.DateNotification</h5>
+                <h3>@item.Name</h3>
+                <h5>@item.DateTime.ToString("yyyy-MM-dd hh:mm tt")</h5>
                 @if (item.IsPaid)
                 {
                     <h5>Estado: <strong>Pagado</strong> </h5>
@@ -75,48 +29,6 @@
                     <h5>Estado: <strong>Sin Pagar</strong> </h5>
                 }
             </RadzenCard>
-
-            @if (!item.IsPaid)
-            {
-
-                <div class="swipe-actions">
-                    <div class="swipe-action">
-                        <RadzenButton @onclick="() => EditItem(item)"
-                                      ButtonStyle="ButtonStyle.Info"
-                                      Icon="edit"
-                                      class="rz-border-radius-circle rz-shadow-8"
-                                      Style="padding: 1rem;border-radius: 50%">
-                        </RadzenButton>
-                    </div>
-
-                    <div class="swipe-action">
-                        <RadzenButton Click="() => RescheduleNotification(item)"
-                                      ButtonStyle="ButtonStyle.Light"
-                                      Icon="cached"
-                                      class="rz-border-radius-circle rz-shadow-8"
-                                      Style="padding: 1rem;border-radius: 50%">
-                        </RadzenButton>
-                    </div>
-
-                    <div class="swipe-action">
-                        <RadzenButton Click="() => MarAsPayed(item)"
-                                      ButtonStyle="ButtonStyle.Success"
-                                      Icon="done"
-                                      class="rz-border-radius-circle rz-shadow-8"
-                                      Style="padding: 1rem;border-radius: 50%">
-                        </RadzenButton>
-                    </div>
-
-                    <div class="swipe-action">
-                        <RadzenButton Click="() => DeleteItem(item)"
-                                      ButtonStyle="ButtonStyle.Danger"
-                                      Icon="delete"
-                                      class="rz-border-radius-circle rz-shadow-8"
-                                      Style="padding: 1rem;border-radius: 50%">
-                        </RadzenButton>
-                    </div>
-                </div>
-            }
         </div>
     }
 </div>
@@ -129,148 +41,27 @@
     private bool? checkBoxValue;
     private List<SwipeItemNotification> Items = new List<SwipeItemNotification>();
 
-
-
-    protected override void OnInitialized()
-    {
-    }
-
     protected override async Task OnInitializedAsync()
     {
-        notifications = await DatabaseService.GetNotificationsAsync();
-
-        ReloadItems();
+        await ReloadData();
+        StateService.OnChange += StateHasChangedData;
     }
 
-    void ReloadItems()
+    async Task ReloadData()
     {
-        Items.Clear();
-
-        foreach (var not in notifications)
-        {
-
-            Items.Add(new SwipeItemNotification
-                {
-                    Id = not.Id,
-                    Title = not.Name,
-                    IsPaid = not.IsPaid,
-                    DateNotification = not.DateTime.ToString("yyyy-MM-dd hh:mm tt")
-                });
-        }
+        notifications = await DatabaseService.GetNotificationsAsync(true);
     }
 
-    async Task<bool> MarAsPayed(SwipeItemNotification item)
+    async Task StateHasChangedData()
     {
-        selectedNotification = notifications.Where((x) => x.Id == item.Id).FirstOrDefault() ?? new NotificationData();
-
-
-        // var result = await DialogService.OpenAsync<ConfirmDialog>("Confirmación", new Dictionary<string, object> {
-        //     { "Notification", notification }
-        // });
-
-        bool answer = await Application.Current.MainPage.DisplayAlert("Confirmación", "¿Estás seguro que deseas realizar esta acción?", "Sí", "No");
-
-        if (answer == true)
-        {
-            selectedNotification.IsPaid = true;
-
-            await DatabaseService.SaveNotificationAsync(selectedNotification, true);
-
-            notifications = await DatabaseService.GetNotificationsAsync();
-        }
-
-        return await Task.FromResult(true);
-    }
-
-    async Task<bool> RescheduleNotification(SwipeItemNotification item)
-    {
-        selectedNotification = notifications.Where((x) => x.Id == item.Id).FirstOrDefault() ?? new NotificationData();
-
-        // var result = await DialogService.OpenAsync<ConfirmDialog>("Confirmación", new Dictionary<string, object> {
-        //     { "Notification", notification }
-        // });
-
-        bool answer = await Application.Current.MainPage.DisplayAlert("Confirmación", "¿Estás seguro que deseas realizar esta acción?", "Sí", "No");
-
-        if (answer == true)
-        {
-            // Si el usuario confirma, programamos una nueva notificación para el próximo mes
-            selectedNotification.IsPaid = false;
-            selectedNotification.DateTime = selectedNotification.DateTime.AddDays(30);
-            selectedNotification.Id = 0;
-
-            int result = await DatabaseService.SaveNotificationAsync(selectedNotification, false);
-
-            notifications = await DatabaseService.GetNotificationsAsync();
-            ReloadItems();
-        }
-
-
-
-        return await Task.FromResult(true);
-    }
-
-
-    public class SwipeItemNotification
-    {
-        public int Id { get; set; }
-        public string Title { get; set; } = string.Empty;
-        public ElementReference ElementReference { get; set; }
-        public double StartX { get; set; }
-        public bool IsPaid { get; set; }
-        public string DateNotification { get; set; } = string.Empty;
-    }
-
-    private async Task TouchStart(TouchEventArgs e, SwipeItemNotification item)
-    {
-        if (!item.IsPaid)
-        {
-            item.StartX = e.Touches[0].ClientX;
-        }
-
-    }
-
-    private async Task TouchMove(TouchEventArgs e, SwipeItemNotification item)
-    {
-        if (!item.IsPaid)
-        {
-            var currentX = e.Touches[0].ClientX;
-            var diff = item.StartX - currentX;
-
-            if (diff > 0 && diff <= 200)
-            {
-                await JSRuntime.InvokeVoidAsync("eval", $"document.querySelector('[_bl_{item.ElementReference.Id}] .swipe-actions').style.transform = 'translateX(-{diff}px)'");
-            }
-
-        }
-    }
-
-    private async Task TouchEnd(SwipeItemNotification item)
-    {
-        if (!item.IsPaid)
-        {
-            await JSRuntime.InvokeVoidAsync("eval", $"document.querySelector('[_bl_{item.ElementReference.Id}] .swipe-actions').style.transform = 'translateX(-150px)'");
-
-        }
-    }
-
-    private void EditItem(SwipeItemNotification item)
-    {
-        // Lógica para editar el item
-        Console.WriteLine($"Editando item {item.Id}");
-    }
-
-    private async Task DeleteItem(SwipeItemNotification item)
-    {
-        var notification = new NotificationData()
-            {
-                Id = item.Id
-            };
-
-        await DatabaseService.DeleteNotificationAsync(notification);
-        Items.Remove(item);
+        await ReloadData();
         StateHasChanged();
     }
 
+
+    public void Dispose()
+    {
+        StateService.OnChange -= StateHasChangedData;
+    }
 }
 

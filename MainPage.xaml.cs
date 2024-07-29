@@ -2,11 +2,34 @@
 {
     public partial class MainPage : TabbedPage
     {
+        AppTheme currentTheme = Application.Current.RequestedTheme;
 
         private DateTime _selectedDateTime;
         public MainPage()
         {
             InitializeComponent();
+
+            if (currentTheme == AppTheme.Light)
+            {
+                this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#ffffff"), Color.FromArgb("#ffffff"));
+            }
+            else
+            {
+                this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#32323d"), Color.FromArgb("#32323d"));
+            }
+
+            Application.Current.RequestedThemeChanged += (s, a) =>
+            {
+                if (a.RequestedTheme == AppTheme.Light)
+                {
+                    this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#ffffff"), Color.FromArgb("#ffffff"));
+                }
+                else
+                {
+                    this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#32323d"), Color.FromArgb("#32323d"));
+                }
+            };
+
             //myDatePicker.MinimumDate = new DateTime(2000, 1, 1);
             //myDatePicker.MaximumDate = DateTime.Today;
         }

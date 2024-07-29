@@ -11,6 +11,14 @@
 @namespace PayRemind.Components.Pages
 
 
+
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+
+
 <h3 class="text-center">Lista de Notificaciones Pagadas</h3>
 
 
@@ -18,18 +26,20 @@
     @foreach (var item in notifications)
     {
         <div class="swipe-item rz-shadow-1 rz-mb-2">
-            <RadzenCard>
-                <h3>@item.Name</h3>
-                <h5>@item.DateTime.ToString("yyyy-MM-dd hh:mm tt")</h5>
-                @if (item.IsPaid)
-                {
-                    <h5>Estado: <strong>Pagado</strong> </h5>
-                }
-                else
-                {
-                    <h5>Estado: <strong>Sin Pagar</strong> </h5>
-                }
-            </RadzenCard>
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h5">@item.Name</MudText>
+                    <MudText Typo="Typo.body2">@item.DateTime</MudText>
+                    @if (item.IsPaid)
+                    {
+                        <MudText Typo="Typo.body2">Estado: <strong>Pagado</strong></MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2">Estado: <strong>Sin Pagar</strong></MudText>
+                    }
+                </MudCardContent>
+            </MudCard>
         </div>
     }
 </div>
@@ -45,23 +55,23 @@
     private NotificationData selectedNotification = new();
     private bool? checkBoxValue;
     private List<SwipeItemNotification> Items = new List<SwipeItemNotification>();
+    private bool _isDarkMode;
+
+
 
     protected override async Task OnInitializedAsync()
     {
 
-        string theme = "";
-
         if (currentTheme == AppTheme.Light)
         {
-            theme = "material";
+            _isDarkMode = false;
         }
         else
         {
-            theme = "material-dark";
+            _isDarkMode = true;
         }
 
-        await JS.InvokeVoidAsync("loadRadzenTheme", theme);
-
+        
         await ReloadData();
         StateService.OnChange += StateHasChangedData;
     }

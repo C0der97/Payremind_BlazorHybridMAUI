@@ -1,0 +1,95 @@
+﻿@using Plugin.LocalNotification
+@using PayRemind.Shared
+
+
+@inject SQLiteDatabaseService DatabaseService
+@inject SharedStateService StateService
+
+
+
+<MudDialog>
+    <DialogContent>
+        <div class="d-flex flex-column py-1">
+
+            <EditForm Model="@notificationData" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <MudTextField @bind-Value="notificationData.Name" Label="Nombre" Variant="Variant.Outlined"></MudTextField>
+                <ValidationMessage For="@(() => notificationData.Name)" />
+
+                <MudNumericField @bind-Value="notificationData.Amount" Label="Monto" Variant="Variant.Outlined"></MudNumericField>
+                <ValidationMessage For="@(() => notificationData.Amount)" />
+
+                <MudDatePicker @bind-Value="datePart" Label="Fecha" Variant="Variant.Outlined"></MudDatePicker>
+                <ValidationMessage For="@(() => datePart)" />
+
+                <MudTimePicker @bind-Value="@timePart" Label="Hora" Variant="Variant.Outlined" TimeFormat="hh:mm:ss"></MudTimePicker>
+                <ValidationMessage For="@(() => timePart)" />
+
+
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled">Programar</MudButton>
+            </EditForm>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Close">Cancelar</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Close">Aceptar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private NotificationData notificationData = new NotificationData();
+
+
+
+    private List<NotificationData> notifications = new();
+    private NotificationData selectedNotification = new();
+
+    public DateTime datePart { get; set; } = DateTime.Now.Date;
+    public TimeSpan? timePart { get; set; }
+
+    private void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+    private async Task HandleValidSubmit()
+    {
+        await SubmitForm();
+        Close();
+    }
+
+    async Task SubmitForm()
+    {
+        var timeLocalPart = timePart ?? DateTime.Now.TimeOfDay;
+        notificationData.DateTime = datePart.Add(timeLocalPart);
+        Random rnd = new Random();
+
+        var notification = new NotificationRequest
+            {
+                NotificationId = rnd.Next(),
+                Title = "Recordatorio de pago: " + notificationData.Name,
+                Description = $"Por Monto de: ${notificationData.Amount:F2}",
+                Schedule = new NotificationRequestSchedule
+                {
+                    NotifyTime = notificationData.DateTime
+                },
+                Group = "Reminders",
+                CategoryType = NotificationCategoryType.Reminder
+            };
+
+        if (DeviceInfo.Current.Platform == DevicePlatform.Android)
+        {
+            await LocalNotificationCenter.Current.Show(notification);
+        }
+
+        await DatabaseService.SaveNotificationAsync(notificationData, false);
+
+        StateService.NotifyStateChanged();
+
+    }
+
+
+    
+}

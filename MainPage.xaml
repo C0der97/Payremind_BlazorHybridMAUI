@@ -4,10 +4,10 @@
              xmlns:local="clr-namespace:PayRemind"
              xmlns:pages="clr-namespace:PayRemind.Components.Pages"
              x:Class="PayRemind.MainPage"
-             BackgroundColor="{DynamicResource PageBackgroundColor}"
              xmlns:android="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;assembly=Microsoft.Maui.Controls"
              android:TabbedPage.ToolbarPlacement="Bottom"
-             android:TabbedPage.IsSwipePagingEnabled="False">
+             android:TabbedPage.IsSwipePagingEnabled="False"
+             >
 
     <TabbedPage.Children>
 

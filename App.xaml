@@ -5,10 +5,6 @@
              x:Class="PayRemind.App">
     <Application.Resources>
         <ResourceDictionary>
-
-            <Color x:Key="PageBackgroundColor">#3dc4a4</Color>
-            <Color x:Key="PrimaryTextColor">white</Color>
-
             <Style TargetType="Label">
                 <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}" />
                 <Setter Property="FontFamily" Value="OpenSansRegular" />
@@ -27,7 +23,7 @@
                 <!-- Otros estilos -->
             </Style>
             <Style x:Key="DarkTheme" TargetType="ContentPage">
-                <Setter Property="BackgroundColor" Value="Black" />
+                <Setter Property="BackgroundColor" Value="#32323d" />
                 <!-- Otros estilos -->
             </Style>
 

@@ -1,13 +1,14 @@
 ﻿@page "/"
-@inject NotificationService NotificationService
 @inject NotificationServiceBd NotificationServiceBd
 @inject NotificationServiceMaui NotificationServiceMaui
 @inject SQLiteDatabaseService DatabaseService
 @inject IJSRuntime JSRuntime
-@inject DialogService DialogService
 @inject SharedStateService StateService
-@inject ThemeService ThemeService
 @inject IJSRuntime JS
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@implements IDisposable
+
 
 @using Maui.NullableDateTimePicker
 @using PayRemind.Shared
@@ -15,6 +16,10 @@
 @using Microsoft.Extensions.DependencyInjection
 
 
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider Position="DialogPosition.TopCenter" />
+<MudSnackbarProvider />
 
 <style>
     .swipe-item {
@@ -42,145 +47,44 @@
     }
 </style>
 
-
-<p>
-    @foreach(var it in @Themes.Free)
-    {
-        <strong>@it.Value</strong>
-        <br>
-    }
-</p>
-
-
-<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="notificationModalLabel">Programar Notificación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="rz-p-0 rz-p-md-12">
-                    <EditForm Model="@notificationData" OnValidSubmit="HandleValidSubmit">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary />
-
-                        <RadzenRow Gap="1rem">
-                            <RadzenColumn Size="12" SizeSM="6">
-                                <RadzenStack>
-                                    <RadzenFormField Text="Nombre" Variant="Variant.Outlined">
-                                        <RadzenTextBox @bind-Value="notificationData.Name" />
-                                    </RadzenFormField>
-                                    <ValidationMessage For="@(() => notificationData.Name)" />
-
-                                    <RadzenFormField Text="Monto" Variant="Variant.Outlined">
-                                        <RadzenNumeric  @bind-Value="notificationData.Amount" />
-                                    </RadzenFormField>
-@*                                     <RadzenFormField Text="Fecha" Variant="Variant.Outlined">
-                                        <ChildContent>
-                                            <RadzenDatePicker @bind-Value="@valueData" />
-                                        </ChildContent>
-                                        <End>
-                                        </End>
-                                    </RadzenFormField> *@
-                                    <div class="mb-3">
-                                        <label for="datePart" class="form-label">Fecha</label>
-                                        <InputDate id="datePart" class="form-control" @bind-Value="datePart" />
-                                        <ValidationMessage For="@(() => datePart)" />
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="timePart" class="form-label">Hora</label>
-                                        <input id="timePart" type="time" class="form-control" @oninput="UpdateTimePart" />
-                                        <ValidationMessage For="@(() => timePart)" />
-                                    </div>
-
-                                    <RadzenButton ButtonType="ButtonType.Submit" Class="custom-success-button rz-ripple" Text="Programar" Icon="add_circle" ButtonStyle="ButtonStyle.Primary" />
-
-                                </RadzenStack>
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </EditForm>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="rz-p-4">
-    @foreach (var item in Items)
-    {
-        <div class="swipe-item rz-shadow-1 rz-mb-2" @ref="item.ElementReference" @ontouchstart="@(e => TouchStart(e, item))" @ontouchmove="@(e => TouchMove(e, item))" @ontouchend="@(e => TouchEnd(item))">
-            <RadzenCard>
-                <h3>@item.Title</h3>
-                <h5>@item.DateNotification</h5>
-                @if (item.IsPaid)
-                {
-                    <h5>Estado: <strong>Pagado</strong> </h5>
-                }
-                else
-                {
-                    <h5>Estado: <strong>Sin Pagar</strong> </h5>
-                }
-            </RadzenCard>
-
+@foreach (var item in Items)
+{
+    <MudPaper Class="pa-4 my-4" Elevation="3">
+        <MudCard>
+            <MudCardContent>
+                <MudText Typo="Typo.h5">@item.Title</MudText>
+                <MudText Typo="Typo.body2">@item.DateNotification</MudText>
+                <MudText Typo="Typo.body2">
+                    Estado: <strong>@(item.IsPaid ? "Pagado" : "Sin Pagar")</strong>
+                </MudText>
+            </MudCardContent>
             @if (!item.IsPaid)
             {
-
-                <div class="swipe-actions">
-                    <div class="swipe-action">
-                        <RadzenButton @onclick="() => EditItem(item)"
-                                      ButtonStyle="ButtonStyle.Info"
-                                      Icon="edit"
-                                      class="rz-border-radius-circle rz-shadow-8"
-                                      Style="padding: 1rem;border-radius: 50%">
-                        </RadzenButton>
-                    </div>
-
-                    <div class="swipe-action">
-                        <RadzenButton Click="() => RescheduleNotification(item)"
-                                      ButtonStyle="ButtonStyle.Light"
-                                      Icon="cached"
-                                      class="rz-border-radius-circle rz-shadow-8"
-                                      Style="padding: 1rem;border-radius: 50%">
-                        </RadzenButton>
-                    </div>
-
-                    <div class="swipe-action">
-                        <RadzenButton Click="() => MarAsPayed(item)"
-                                      ButtonStyle="ButtonStyle.Success"
-                                      Icon="done"
-                                      class="rz-border-radius-circle rz-shadow-8"
-                                      Style="padding: 1rem;border-radius: 50%">
-                        </RadzenButton>
-                    </div>
-
-                    <div class="swipe-action">
-                        <RadzenButton Click="() => DeleteItem(item)"
-                                      ButtonStyle="ButtonStyle.Danger"
-                                      Icon="delete"
-                                      class="rz-border-radius-circle rz-shadow-8"
-                                      Style="padding: 1rem;border-radius: 50%">
-                        </RadzenButton>
-                    </div>
-                </div>
+                <MudCardActions>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   Color="Color.Info"
+                                   OnClick="() => EditItem(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Cached"
+                                   Color="Color.Default"
+                                   OnClick="() => RescheduleNotification(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Done"
+                                   Color="Color.Success"
+                                   OnClick="() => MarAsPayed(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   OnClick="() => DeleteItem(item)" />
+                </MudCardActions>
             }
-        </div>
-    }
-</div>
+        </MudCard>
+    </MudPaper>
+}
 
 
-
-
-<div class="rz-p-12">
-    <RadzenButton Click="ShowModal"
-                  ButtonStyle="ButtonStyle.Primary"
-                  Icon="add"
-                  class="rz-border-radius-circle rz-shadow-8"
-                  Style="position: fixed; right: 2rem; bottom: 2rem; padding: 1rem;
-                    border-radius: 50%">
-    </RadzenButton>
-</div>
+<MudIconButton Icon="@Icons.Material.Filled.Add" 
+Variant="Variant.Filled"
+               OnClick="OpenDialogAsync"
+               Size="Size.Large"
+               Style=@($"position: fixed;right: 20px; bottom: 20px; z-index: 100%;border-radius:50%;background-color:#3dc4a4;color:white")></MudIconButton>
 
 
 
@@ -194,17 +98,7 @@
     private NotificationData selectedNotification = new();
     private List<SwipeItemNotification> Items = new List<SwipeItemNotification>();
 
-
-    string value = "Text";
-    DateTime valueData = DateTime.Now;
-    int intValue = 123;
-    int radioButtonValue = 1;
-    string dropDownValue = "Around the Horn";
-    string dropDownDataGridValue = "";
-    string autoCompleteValue = "";
-    string color = "rgb(68, 58, 110)";
-
-    bool isBusyScheduleButton = false;
+    private bool _isDarkMode;
 
     public DateTime datePart { get; set; } = DateTime.Now.Date;
     public TimeSpan timePart { get; set; } = DateTime.Now.TimeOfDay;
@@ -232,31 +126,27 @@
 
     protected override async Task OnInitializedAsync()
     {
-        string theme = "";
-
         if (currentTheme == AppTheme.Light)
         {
-            theme = "material";
+            _isDarkMode = false;
         }
         else
         {
-            theme = "material-dark";
+            _isDarkMode = true;
         }
-
-        await JS.InvokeVoidAsync("loadRadzenTheme", theme);
 
         if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
         {
             await LocalNotificationCenter.Current.RequestNotificationPermission();
         }
+
         dateTimePicker.NullableDateTimeChanged += OnNullableDateTimeChanged;
 
-        notifications = await DatabaseService.GetNotificationsAsync();
+        notifications = await DatabaseService.GetNotificationsAsync(false);
 
         ReloadItems();
 
-        ThemeService.SetTheme("material-dark");
-
+        StateService.OnChange += StateHasChangedData;
 
     }
 
@@ -280,7 +170,6 @@
 
     async Task OpenCalendar()
     {
-        isBusyScheduleButton = true;
         StateHasChanged();
 
         INullableDateTimePickerOptions nullableDateTimePickerOptions = new NullableDateTimePickerOptions
@@ -300,53 +189,13 @@
             Console.WriteLine("Fecha: " + MyDateTime.ToString());
         }
 
-        isBusyScheduleButton = false;
         StateHasChanged();
     }
 
-    async Task SubmitForm()
-    {
-        notificationData.DateTime = datePart.Add(timePart);
-        Random rnd = new Random();
 
-        var notification = new NotificationRequest
-            {
-                NotificationId = rnd.Next(),
-                Title = "Recordatorio de pago: " + notificationData.Name,
-                Description = $"Por Monto de: ${notificationData.Amount:F2}",
-                Schedule = new NotificationRequestSchedule
-                {
-                    NotifyTime = notificationData.DateTime
-                },
-                Group = "Reminders",
-                CategoryType = NotificationCategoryType.Reminder
-            };
 
-        if (DeviceInfo.Current.Platform == DevicePlatform.Android)
-        {
-            await LocalNotificationCenter.Current.Show(notification);
-        }
 
-        await DatabaseService.SaveNotificationAsync(notificationData, false);
 
-        notifications = await DatabaseService.GetNotificationsAsync();
-
-        ReloadItems();
-
-        NotificationServiceMaui.ShowNotification(notificationData.Name, $"Se ha programado un recordatorio de {notificationData.Name} para el {notificationData.DateTime:g}");
-    }
-
-    private async Task HandleValidSubmit()
-    {
-        await SubmitForm();
-        await JSRuntime.InvokeVoidAsync("hideNotificationModal");
-
-    }
-
-    private async Task ShowModal()
-    {
-        await JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('notificationModal')).show()");
-    }
 
     private void UpdateTimePart(ChangeEventArgs e)
     {
@@ -357,11 +206,6 @@
     {
         selectedNotification = notifications.Where((x) => x.Id == item.Id).FirstOrDefault() ?? new NotificationData();
 
-
-        // var result = await DialogService.OpenAsync<ConfirmDialog>("Confirmación", new Dictionary<string, object> {
-        //     { "Notification", notification }
-        // });
-
         bool answer = await Application.Current.MainPage.DisplayAlert("Confirmación", "¿Estás seguro que deseas realizar esta acción?", "Sí", "No");
 
         if (answer == true)
@@ -370,7 +214,7 @@
 
             await DatabaseService.SaveNotificationAsync(selectedNotification, true);
 
-            notifications = await DatabaseService.GetNotificationsAsync();
+            notifications = await DatabaseService.GetNotificationsAsync(false);
 
             StateService.NotifyStateChanged();
 
@@ -385,9 +229,6 @@
     {
         selectedNotification = notifications.Where((x) => x.Id == item.Id).FirstOrDefault() ?? new NotificationData();
 
-        // var result = await DialogService.OpenAsync<ConfirmDialog>("Confirmación", new Dictionary<string, object> {
-        //     { "Notification", notification }
-        // });
 
         bool answer = await Application.Current.MainPage.DisplayAlert("Confirmación", "¿Estás seguro que deseas realizar esta acción?", "Sí", "No");
 
@@ -400,7 +241,7 @@
 
             int result = await DatabaseService.SaveNotificationAsync(selectedNotification, false);
 
-            notifications = await DatabaseService.GetNotificationsAsync();
+            notifications = await DatabaseService.GetNotificationsAsync(false);
 
             StateService.NotifyStateChanged();
 
@@ -463,7 +304,34 @@
             };
 
         await DatabaseService.DeleteNotificationAsync(notification);
+        int[] cancelIds = [notification.Id];
+        LocalNotificationCenter.Current.Cancel(cancelIds);
+
+
         Items.Remove(item);
         StateHasChanged();
     }    
+
+    private Task OpenDialogAsync()
+    {
+        return DialogService.ShowAsync<DialogSetOptionsExample_Dialog>("Nuevo Recordatorio");
+    }
+
+    async Task StateHasChangedData()
+    {
+        await ReloadData();
+        ReloadItems();
+        StateHasChanged();
+    }
+
+    async Task ReloadData()
+    {
+        notifications = await DatabaseService.GetNotificationsAsync(false);
+    }
+
+    public void Dispose()
+    {
+        StateService.OnChange -= StateHasChangedData;
+    }
+
 }

@@ -71,8 +71,8 @@
         <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.70" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.70" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+        <PackageReference Include="MudBlazor" Version="7.4.0" />
         <PackageReference Include="Plugin.LocalNotification" Version="11.1.4" />
-        <PackageReference Include="Radzen.Blazor" Version="5.0.3" />
         <PackageReference Include="Sebarslan.Maui.NullableDateTimePicker" Version="2.3.1" />
         <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 		
@@ -85,6 +85,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Components\Layout\" />
       <Folder Include="wwwroot\NewFolder\" />
     </ItemGroup>
 

@@ -6,7 +6,8 @@
     <title>PayRemind</title>
     <base href="/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="_content/Radzen.Blazor/css/default.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="PayRemind.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -21,24 +22,24 @@
             transition: background-color 0.3s, transform 0.3s;
         }
 
-/* Estilo del botón cuando se pasa el mouse por encima */
-.custom-success-button:hover {
-    background-color: darkgreen; /* Cambia el color al pasar el mouse */
-    transform: scale(1.05); /* Aumenta ligeramente el tamaño */
-}
+            /* Estilo del botón cuando se pasa el mouse por encima */
+            .custom-success-button:hover {
+                background-color: darkgreen; /* Cambia el color al pasar el mouse */
+                transform: scale(1.05); /* Aumenta ligeramente el tamaño */
+            }
 
-/* Estilo del botón cuando se hace clic (active) */
-.custom-success-button:active {
-    background-color: green; /* Color cuando está activo */
-    transform: scale(0.95); /* Disminuye ligeramente el tamaño */
-}
+            /* Estilo del botón cuando se hace clic (active) */
+            .custom-success-button:active {
+                background-color: green; /* Color cuando está activo */
+                transform: scale(0.95); /* Disminuye ligeramente el tamaño */
+            }
 
-/* Estilo del botón cuando está deshabilitado */
-.custom-success-button:disabled {
-    background-color: gray; /* Color del botón deshabilitado */
-    cursor: not-allowed;
-    opacity: 0.6;
-}
+            /* Estilo del botón cuando está deshabilitado */
+            .custom-success-button:disabled {
+                background-color: gray; /* Color del botón deshabilitado */
+                cursor: not-allowed;
+                opacity: 0.6;
+            }
 
         :root {
             --rz-primary: #3dc4a4; /* Color primario */
@@ -51,7 +52,6 @@
             --rz-dark: #343a40; /* Color oscuro */
             /* Puedes añadir más variables si lo necesitas */
         }
-
     </style>
 </head>
 
@@ -60,7 +60,11 @@
 
     <div class="status-bar-safe-area"></div>
 
-    <div id="app"></div>
+    <div id="app">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden"></span>
+        </div>
+    </div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -69,8 +73,7 @@
     </div>
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
-    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
-    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script>
         window.loadRadzenTheme = function (theme) {
             var link = document.querySelector('link[href*="_content/Radzen.Blazor/css/"]');
@@ -83,11 +86,6 @@
                 document.body.style.color = "white";
             }
         };
-
-        window.hideNotificationModal = function() {
-            var modal = new bootstrap.Modal(document.getElementById('notificationModal'));
-            modal.hide();
-        }
     </script>
 
 </body>

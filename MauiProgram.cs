@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Logging;
 using PayRemind.Shared;
 using Plugin.LocalNotification;
-using Radzen;
 using CommunityToolkit.Maui;
+using MudBlazor.Services;
 
 namespace PayRemind
 {
@@ -20,7 +20,7 @@ namespace PayRemind
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             }).UseMauiCommunityToolkit();
             builder.Services.AddMauiBlazorWebView();
-            builder.Services.AddRadzenComponents();
+            builder.Services.AddMudServices();
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
             builder.Logging.AddDebug();

@@ -15,9 +15,9 @@ public class SQLiteDatabaseService
         return await _database.Table<NotificationData>().ToListAsync();
     }
 
-    public async Task<int> SaveNotificationAsync(NotificationData notification)
+    public async Task<int> SaveNotificationAsync(NotificationData notification,bool Updating)
     {
-        if (notification.Id != 0)
+        if (Updating)
         {
             return await _database.UpdateAsync(notification);
         }

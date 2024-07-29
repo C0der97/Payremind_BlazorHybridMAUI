@@ -43,7 +43,7 @@
 
     async Task<bool> OnChange(NotificationData notification)
     {
-        notification.IsPaid = true;
+        notification.IsPaid = false;
         selectedNotification = notification;
         // var result = await DialogService.OpenAsync<ConfirmDialog>("Confirmación", new Dictionary<string, object> {
         //     { "Notification", notification }
@@ -59,10 +59,10 @@
                     Name = notification.Name,
                     Amount = notification.Amount,
                     DateTime = notification.DateTime.AddDays(30),
-                    IsPaid = false
+                    IsPaid = true
                 };
 
-            await DatabaseService.SaveNotificationAsync(newNotification);
+            await DatabaseService.SaveNotificationAsync(newNotification, true);
 
             notifications = await DatabaseService.GetNotificationsAsync();
         }

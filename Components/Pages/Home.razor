@@ -3,43 +3,60 @@
 @inject NotificationServiceBd NotificationServiceBd
 @inject NotificationServiceMaui NotificationServiceMaui
 @inject SQLiteDatabaseService DatabaseService
+@inject IJSRuntime JSRuntime
+
 
 @using Maui.NullableDateTimePicker
 @using PayRemind.Shared
 @using Plugin.LocalNotification
 @using Microsoft.Extensions.DependencyInjection
 
-<RadzenTemplateForm TItem="NotificationData" Data="@notificationData" Submit="@SubmitForm">
-    <RadzenFieldset Text="Programar Notificación">
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <RadzenLabel Text="Nombre" />
-                <RadzenTextBox @bind-Value="@notificationData.Name" Name="Name" />
-                <RadzenRequiredValidator Component="Name" Text="El nombre es requerido" />
+
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationModalLabel">Programar Notificación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@notificationData" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nombre</label>
+                        <InputText id="name" class="form-control" @bind-Value="notificationData.Name" />
+                        <ValidationMessage For="@(() => notificationData.Name)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Monto</label>
+                        <InputNumber id="amount" class="form-control" @bind-Value="notificationData.Amount" />
+                        <ValidationMessage For="@(() => notificationData.Amount)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="datePart" class="form-label">Fecha</label>
+                        <InputDate id="datePart" class="form-control" @bind-Value="datePart" />
+                        <ValidationMessage For="@(() => datePart)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="timePart" class="form-label">Hora</label>
+                        <input id="timePart" type="time" class="form-control" @oninput="UpdateTimePart" />
+                        <ValidationMessage For="@(() => timePart)" />
+                    </div>
+
+                    <RadzenButton ButtonType="ButtonType.Submit" Class="custom-success-button rz-ripple" Text="Programar" Icon="add_circle" ButtonStyle="ButtonStyle.Primary" />
+                </EditForm>
             </div>
         </div>
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <RadzenLabel Text="Monto" />
-                <RadzenNumeric @bind-Value="@notificationData.Amount" Name="Amount" />
-                <RadzenRequiredValidator Component="Amount" Text="El monto es requerido" />
-            </div>
-        </div>
-        <div class="row mb-3 p-4">
-            <RadzenButton class="col-1" IsBusy=@isBusyScheduleButton Click="OpenCalendar" Icon="alarm_add" ButtonStyle="ButtonStyle.Dark" />
-            &nbsp;&nbsp; <RadzenLabel class="col-9 ml-2" Text="@notificationData.DateTime.ToString("yyyy/MM/dd HH:mm")" />
-        </div>
-        @* <RadzenButton Class="custom-success-button" Variant="Variant.Flat" Shade="Shade.Darker" ButtonType="ButtonType.Submit" Text="Programar Notificación" ButtonStyle="ButtonStyle.Base" /> *@
-
-        <RadzenButton ButtonType="ButtonType.Submit" Class="custom-success-button rz-ripple" Text="Programar Notificación" Icon="add_circle" ButtonStyle="ButtonStyle.Primary" />
-        
-@*         <button type="submit" class="custom-success-button rz-ripple">Programar Notificación</button> *@
-
-    </RadzenFieldset>
-</RadzenTemplateForm>
+    </div>
+</div>
 
 <div class="rz-p-12">
-    <RadzenButton
+    <RadzenButton Click="ShowModal"
                   ButtonStyle="ButtonStyle.Success"
                   Icon="add"
                   class="rz-border-radius-circle rz-shadow-8"
@@ -47,13 +64,25 @@
     </RadzenButton>
 </div>
 
-
 @code {
     private NotificationData notificationData = new NotificationData();
 
     bool isBusyScheduleButton = false;
 
-    private DateTime dateNotification {get; set; } = DateTime.Now;
+    public DateTime datePart { get; set; } = DateTime.Now.Date;
+    public TimeSpan timePart { get; set; } = DateTime.Now.TimeOfDay;
+
+    public string timePartString
+    {
+        get => timePart.ToString(@"hh\:mm");
+        set
+        {
+            if (TimeSpan.TryParse(value, out TimeSpan parsedTime))
+            {
+                timePart = parsedTime;
+            }
+        }
+    }
 
     NullableDateTimePicker dateTimePicker = new NullableDateTimePicker();
 
@@ -71,8 +100,6 @@
             await LocalNotificationCenter.Current.RequestNotificationPermission();
         }
         dateTimePicker.NullableDateTimeChanged += OnNullableDateTimeChanged;
-
-
     }
 
     async Task OpenCalendar()
@@ -80,21 +107,20 @@
         isBusyScheduleButton = true;
         StateHasChanged();
 
-
         INullableDateTimePickerOptions nullableDateTimePickerOptions = new NullableDateTimePickerOptions
-                 {
-                     NullableDateTime = DateTime.Now,
-                     Mode = PickerModes.DateTime,
-                     ShowWeekNumbers = true
-                 };
+            {
+                NullableDateTime = DateTime.Now,
+                Mode = PickerModes.DateTime,
+                ShowWeekNumbers = true
+            };
 
         var result = await NullableDateTimePicker.OpenCalendarAsync(nullableDateTimePickerOptions);
 
         if (result is PopupResult popupResult && popupResult.ButtonResult != PopupButtons.Cancel)
         {
             var MyDateTime = popupResult.NullableDateTime;
-            dateNotification = MyDateTime ?? DateTime.Now;
-            notificationData.DateTime = dateNotification;
+            datePart = MyDateTime?.Date ?? DateTime.Now.Date;
+            timePart = MyDateTime?.TimeOfDay ?? DateTime.Now.TimeOfDay;
             Console.WriteLine("Fecha: " + MyDateTime.ToString());
         }
 
@@ -102,23 +128,22 @@
         StateHasChanged();
     }
 
-    async Task SubmitForm(NotificationData data)
+    async Task SubmitForm()
     {
+        notificationData.DateTime = datePart.Add(timePart);
         Random rnd = new Random();
 
         var notification = new NotificationRequest
             {
                 NotificationId = rnd.Next(),
-                Title = "Recordatorio de pago: " + data.Name,
-                Description = $"Por Monto de: ${data.Amount:F2}",
+                Title = "Recordatorio de pago: " + notificationData.Name,
+                Description = $"Por Monto de: ${notificationData.Amount:F2}",
                 Schedule = new NotificationRequestSchedule
                 {
-                    NotifyTime = data.DateTime
-                }
-                ,
+                    NotifyTime = notificationData.DateTime
+                },
                 Group = "Reminders",
                 CategoryType = NotificationCategoryType.Reminder
-               
             };
 
         if (DeviceInfo.Current.Platform == DevicePlatform.Android)
@@ -126,9 +151,25 @@
             await LocalNotificationCenter.Current.Show(notification);
         }
 
-        await DatabaseService.SaveNotificationAsync(data);
+        await DatabaseService.SaveNotificationAsync(notificationData, false);
 
-        NotificationServiceMaui.ShowNotification(data.Name, $"Se ha programado un recordatorio de {data.Name} para el {data.DateTime:g}");
+        NotificationServiceMaui.ShowNotification(notificationData.Name, $"Se ha programado un recordatorio de {notificationData.Name} para el {notificationData.DateTime:g}");
     }
 
+    private async Task HandleValidSubmit()
+    {
+        await SubmitForm();
+        await JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('notificationModal')).hide()");
+
+    }
+
+    private async Task ShowModal()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('notificationModal')).show()");
+    }
+
+    private void UpdateTimePart(ChangeEventArgs e)
+    {
+        timePartString = e.Value.ToString();
+    }
 }

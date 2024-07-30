@@ -7,14 +7,14 @@
 
 @inject SQLiteDatabaseService DatabaseService
 @inject SharedStateService StateService
-
+@inject ISnackbar Snackbar
 
 
 <MudDialog>
     <DialogContent>
         <div class="d-flex flex-column py-1">
 
-            <EditForm Model="@notificationData" OnValidSubmit="HandleValidSubmit">
+            <EditForm Model="@notificationData" OnValidSubmit="HandleValidSubmit" @ref="editFormRef">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
 
@@ -24,29 +24,41 @@
                 <MudNumericField @bind-Value="notificationData.Amount" Label="Monto" Variant="Variant.Outlined"></MudNumericField>
                 <ValidationMessage For="@(() => notificationData.Amount)" />
 
-                <MudDatePicker Id="datePicker" OnClick="OpenCalendar" Editable="false" @bind-Value="datePart"
+@*                 <MudDatePicker Id="datePicker" OnClick="OpenCalendar" Editable="false" @bind-Value="datePart"
                                ReadOnly="true"
                 Label="Fecha" Variant="Variant.Outlined"></MudDatePicker>
-                <ValidationMessage For="@(() => datePart)" />
+                <ValidationMessage For="@(() => datePart)" /> *@
 
-                <MudTimePicker @bind-Value="@timePart" Label="Hora" Variant="Variant.Outlined" TimeFormat="hh:mm:ss"></MudTimePicker>
-                <ValidationMessage For="@(() => timePart)" />
-
-                <MudTextField @bind-Value="datePart"
-                              Label="Select Date"
+                <MudTextField @bind-Value="selectedDate"
+                              Label="Fecha"
                               InputType="InputType.Date"
                               Adornment="Adornment.End"
                               AdornmentIcon="@Icons.Material.Filled.DateRange"
                               Immediate="true">
                 </MudTextField>
 
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled">Programar</MudButton>
+
+                <MudTextField @bind-Value="SelectedTime"
+                              Label="Hora"
+                              InputType="InputType.Time"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@Icons.Material.Filled.Timer"
+                              Immediate="true">
+                </MudTextField>
+
+
+@*                 <MudTimePicker @bind-Value="@timePart" Label="Hora" Variant="Variant.Outlined" TimeFormat="hh:mm:ss"></MudTimePicker>
+                <ValidationMessage For="@(() => timePart)" /> *@
+
+        
+
+                @* <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled">Programar</MudButton> *@
             </EditForm>
         </div>
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Primary" OnClick="Close">Cancelar</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Close">Aceptar</MudButton>
+        <MudButton Color="Color.Primary" OnClick="HandleValidSubmit">Aceptar</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -54,14 +66,18 @@
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; }
 
+    private EditForm editFormRef;
+
     private NotificationData notificationData = new NotificationData();
 
 
+    private string selectedDate = string.Empty;
+    private string SelectedTime = string.Empty;
 
     private List<NotificationData> notifications = new();
     private NotificationData selectedNotification = new();
 
-    public DateTime datePart { get; set; } = DateTime.Now.Date;
+    public DateOnly datePart { get; set; }
     public TimeSpan? timePart { get; set; }
 
     private void Close() => MudDialog.Close(DialogResult.Ok(true));
@@ -69,52 +85,65 @@
     private async Task HandleValidSubmit()
     {
         await SubmitForm();
-        Close();
     }
+
+
 
     async Task SubmitForm()
     {
-        var timeLocalPart = timePart ?? DateTime.Now.TimeOfDay;
-        notificationData.DateTime = datePart.Add(timeLocalPart);
-        Random rnd = new Random();
-
-        var notification = new NotificationRequest
+        try
+        {
+            if (selectedDate == string.Empty || SelectedTime == string.Empty)
             {
-                NotificationId = rnd.Next(),
-                Title = "Recordatorio de pago: " + notificationData.Name,
-                Description = $"Por Monto de: ${notificationData.Amount:F2}",
-                Schedule = new NotificationRequestSchedule
+                Snackbar.Add("Complete el formulario", Severity.Warning, config => { 
+                    config.ShowCloseIcon = true;
+                });
+
+                return;
+            }
+
+            DateTime dateTime = DateTime.ParseExact(selectedDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+
+            var selectedTime = TimeSpan.Parse(SelectedTime);
+
+            var timeLocalPart = timePart ?? DateTime.Now.TimeOfDay;
+            notificationData.DateTime = dateTime.Add(selectedTime);
+            Random rnd = new Random();
+
+            int idNotification = rnd.Next();
+
+            var notification = new NotificationRequest
                 {
-                    NotifyTime = notificationData.DateTime
-                },
-                Group = "Reminders",
-                CategoryType = NotificationCategoryType.Reminder
-            };
+                    NotificationId = idNotification,
+                    Title = "Recordatorio de pago: " + notificationData.Name,
+                    Description = $"Por Monto de: ${notificationData.Amount:F2}",
+                    Schedule = new NotificationRequestSchedule
+                    {
+                        NotifyTime = notificationData.DateTime
+                    },
+                    Group = "Reminders",
+                    CategoryType = NotificationCategoryType.Reminder
+                };
 
-        if (DeviceInfo.Current.Platform == DevicePlatform.Android)
+            if (DeviceInfo.Current.Platform == DevicePlatform.Android)
+            {
+                await LocalNotificationCenter.Current.Show(notification);
+            }
+
+            notificationData.NotificationId = idNotification;
+
+            await DatabaseService.SaveNotificationAsync(notificationData, false);
+
+            StateService.NotifyStateChanged();
+
+            Close();
+
+        }
+        catch (Exception ex)
         {
-            await LocalNotificationCenter.Current.Show(notification);
+            Console.WriteLine(ex.Message);
         }
 
-        await DatabaseService.SaveNotificationAsync(notificationData, false);
-
-        StateService.NotifyStateChanged();
-
     }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JSRuntime.InvokeVoidAsync("preventDefaultOnClick", "datePicker");
-        }
-    }
-
-
-    void OpenCalendar()
-    {
-        JSRuntime.InvokeVoidAsync("interop.showDatePicker");
-    }
-
     
 }

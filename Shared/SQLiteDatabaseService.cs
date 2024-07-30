@@ -41,4 +41,6 @@ public class NotificationData
     public decimal Amount { get; set; }
     public DateTime DateTime { get; set; }
     public bool IsPaid { get; set; }
+
+    public int NotificationId { get; set; }
 }

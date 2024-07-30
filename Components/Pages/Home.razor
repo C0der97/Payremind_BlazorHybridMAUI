@@ -216,6 +216,11 @@ Variant="Variant.Filled"
 
             notifications = await DatabaseService.GetNotificationsAsync(false);
 
+            int[] cancelIds = [selectedNotification.NotificationId];
+            var resultCancel = LocalNotificationCenter.Current.Cancel(cancelIds);
+
+            var pending = await LocalNotificationCenter.Current.GetPendingNotificationList();
+
             StateService.NotifyStateChanged();
 
             ReloadItems();
@@ -304,7 +309,7 @@ Variant="Variant.Filled"
             };
 
         await DatabaseService.DeleteNotificationAsync(notification);
-        int[] cancelIds = [notification.Id];
+        int[] cancelIds = [notification.NotificationId];
         LocalNotificationCenter.Current.Cancel(cancelIds);
 
 

@@ -12,11 +12,11 @@
     <TabbedPage.Children>
 
 
-        <ContentPage Title="Recordatorios" IconImageSource="reloj.png">
+        <ContentPage Title="Recordatorios" IconImageSource="reloj.png" >
 
             <ScrollView>
 
-                    <BlazorWebView HeightRequest="600" x:Name="blazorWebViewHome" HostPage="wwwroot/index.html" >
+                    <BlazorWebView x:Name="blazorWebViewHome" HostPage="wwwroot/index.html" >
                         <BlazorWebView.RootComponents>
                             <RootComponent Selector="#app"  ComponentType="{x:Type pages:Home}" />
                         </BlazorWebView.RootComponents>

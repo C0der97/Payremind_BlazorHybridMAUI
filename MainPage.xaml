@@ -15,13 +15,12 @@
         <ContentPage Title="Recordatorios" IconImageSource="reloj.png">
 
             <ScrollView>
-                <BlazorWebView x:Name="blazorWebViewHome" HostPage="wwwroot/index.html" >
-                    <BlazorWebView.RootComponents>
-                        <RootComponent Selector="#app"  ComponentType="{x:Type pages:Home}" />
-                    </BlazorWebView.RootComponents>
-                </BlazorWebView>
 
-
+                    <BlazorWebView HeightRequest="600" x:Name="blazorWebViewHome" HostPage="wwwroot/index.html" >
+                        <BlazorWebView.RootComponents>
+                            <RootComponent Selector="#app"  ComponentType="{x:Type pages:Home}" />
+                        </BlazorWebView.RootComponents>
+                    </BlazorWebView>
             </ScrollView>
     
 

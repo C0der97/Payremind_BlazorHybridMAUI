@@ -1,4 +1,6 @@
-﻿namespace PayRemind
+﻿using Microsoft.JSInterop;
+
+namespace PayRemind
 {
     public partial class MainPage : TabbedPage
     {
@@ -8,6 +10,7 @@
         public MainPage()
         {
             InitializeComponent();
+
 
             if (currentTheme == AppTheme.Light)
             {
@@ -53,6 +56,15 @@
         private void UpdateDateTimeLabel()
         {
             //selectedDateTime.Text = $"Selected: {_selectedDateTime:g}";
+        }
+
+        [JSInvokable]
+        public static Task ShowDatePicker()
+        {
+
+            // Aquí puedes mostrar el DatePicker o realizar otra lógica
+            // Este ejemplo es simplificado; puede necesitar ajustes según el caso de uso.
+            return Task.CompletedTask;
         }
     }
 }

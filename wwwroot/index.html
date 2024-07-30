@@ -86,6 +86,19 @@
                 document.body.style.color = "white";
             }
         };
+
+        window.preventDefaultOnClick = function (id) {
+            document.getElementById(id).addEventListener('click', function (event) {
+                event.preventDefault();
+            });
+        }
+
+        window.interop = {
+            showDatePicker: function () {
+                // Aquí puedes llamar a una función C# expuesta mediante MAUI
+                DotNet.invokeMethodAsync('PayRemind', 'ShowDatePicker');
+            }
+        };
     </script>
 
 </body>

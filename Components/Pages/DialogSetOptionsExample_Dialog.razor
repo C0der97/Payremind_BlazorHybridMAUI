@@ -1,5 +1,8 @@
 ﻿@using Plugin.LocalNotification
 @using PayRemind.Shared
+@using Microsoft.Maui.Controls
+
+@inject IJSRuntime JSRuntime
 
 
 @inject SQLiteDatabaseService DatabaseService
@@ -21,12 +24,21 @@
                 <MudNumericField @bind-Value="notificationData.Amount" Label="Monto" Variant="Variant.Outlined"></MudNumericField>
                 <ValidationMessage For="@(() => notificationData.Amount)" />
 
-                <MudDatePicker @bind-Value="datePart" Label="Fecha" Variant="Variant.Outlined"></MudDatePicker>
+                <MudDatePicker Id="datePicker" OnClick="OpenCalendar" Editable="false" @bind-Value="datePart"
+                               ReadOnly="true"
+                Label="Fecha" Variant="Variant.Outlined"></MudDatePicker>
                 <ValidationMessage For="@(() => datePart)" />
 
                 <MudTimePicker @bind-Value="@timePart" Label="Hora" Variant="Variant.Outlined" TimeFormat="hh:mm:ss"></MudTimePicker>
                 <ValidationMessage For="@(() => timePart)" />
 
+                <MudTextField @bind-Value="datePart"
+                              Label="Select Date"
+                              InputType="InputType.Date"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@Icons.Material.Filled.DateRange"
+                              Immediate="true">
+                </MudTextField>
 
                 <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled">Programar</MudButton>
             </EditForm>
@@ -90,6 +102,19 @@
 
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("preventDefaultOnClick", "datePicker");
+        }
+    }
+
+
+    void OpenCalendar()
+    {
+        JSRuntime.InvokeVoidAsync("interop.showDatePicker");
+    }
 
     
 }

@@ -88,8 +88,8 @@ namespace PayRemind.Platforms.Android
                 if (!App.AppActive)
                 {
 
-                    var serviceIntent = new Intent(context, typeof(CallService));
-                    context.StartForegroundService(serviceIntent);
+                    //var serviceIntent = new Intent(context, typeof(CallService));
+                    //context.StartForegroundService(serviceIntent);
 
 
                     //var startIntent = new Intent(context, typeof(MainActivity));

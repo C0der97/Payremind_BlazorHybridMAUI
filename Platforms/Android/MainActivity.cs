@@ -5,7 +5,6 @@ using Android.Content.PM;
 using Android.OS;
 using CommunityToolkit.Mvvm.Messaging;
 using PayRemind.Messages;
-using PayRemind.Platforms.Android;
 
 namespace PayRemind
 {
@@ -40,30 +39,12 @@ namespace PayRemind
                 StartActivityForResult(intent, REQUEST_ID);
 
 
-                var serviceIntent = new Intent(this, typeof(CallService));
-                StartForegroundService(serviceIntent);
+                //var serviceIntent = new Intent(this, typeof(CallService));
+                //StartForegroundService(serviceIntent);
             }
 
 
-            if (Intent != null && Intent.Extras != null)
-            {
-                SentrySdk.CaptureMessage("Tiene extras ");
-
-
-                int tabIndex = Intent.Extras.GetInt("TabIndex", -1);
-                if (tabIndex >= 0)
-                {
-                    SentrySdk.CaptureMessage("Llegan los extras ");
-
-                    //MessagingCenter.Send(this, "NavigateToTab", tabIndex);
-
-                    //// Enviar el índice a la aplicación MAUI
-                    //var intent = new Intent(this, typeof(MainActivity));
-                    //intent.PutExtra("TabIndex", tabIndex);
-                    //StartActivity(intent);
-                }
-            }
-
+        
 
             if (Intent.GetBooleanExtra("OpenCallPage", false))
             {
@@ -81,12 +62,6 @@ namespace PayRemind
 
 
                 //OpenCallsTab();
-            }
-
-            var openPage = Intent.GetStringExtra("OpenPage");
-            if (openPage == "CallsPage")
-            {
-                OpenCallsTab();
             }
         }
 

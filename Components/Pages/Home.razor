@@ -144,6 +144,7 @@ Variant="Variant.Filled"
         // await Permissions.RequestAsync<Permissions.ContactsRead>();
         await Permissions.RequestAsync<Permissions.Reminders>();
         await Permissions.RequestAsync<Permissions.Speech>();
+        await Permissions.RequestAsync<Permissions.Battery>();
 
 
         dateTimePicker.NullableDateTimeChanged += OnNullableDateTimeChanged;

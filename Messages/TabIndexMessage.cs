@@ -1,14 +1,15 @@
-﻿using CommunityToolkit.Mvvm.Messaging.Messages;
-
-namespace PayRemind.Messages
+﻿namespace PayRemind.Messages
 {
-    public class TabIndexMessage : ValueChangedMessage<int>
+    public class TabIndexMessage
     {
         public int TabIndex { get; }
+        public string PhoneNumber { get; }
 
-        public TabIndexMessage(int tabIndex) : base(tabIndex)
+
+        public TabIndexMessage(int tabIndex, string phoneNumber)
         {
             TabIndex = tabIndex;
+            PhoneNumber = phoneNumber;
         }
     }
 }

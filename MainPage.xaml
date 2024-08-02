@@ -36,8 +36,8 @@
 
 
 
-        <ContentPage Title="Llamadas" IconImageSource="lista.png"  >
-            <BlazorWebView x:Name="blazorWebViewCalss" HostPage="wwwroot/index.html" StartPath="/calls">
+        <ContentPage Title="Llamadas" IconImageSource="ringphone.png"  >
+            <BlazorWebView x:Name="blazorWebViewCalss" HostPage="wwwroot/index.html">
                 <BlazorWebView.RootComponents>
                     <RootComponent Selector="#app"  ComponentType="{x:Type pages:IncomingCall}" />
                 </BlazorWebView.RootComponents>

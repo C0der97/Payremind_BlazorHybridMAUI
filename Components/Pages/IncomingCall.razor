@@ -15,7 +15,7 @@
             </MudAvatar>
         </MudPaper>
 
-        <MudText Typo="Typo.h2" Align="Align.Center" Style="color: yellow; margin-bottom: 16px;">@_incomingNumber</MudText>
+        <MudText Typo="Typo.h2" Align="Align.Center" Style=" margin-bottom: 16px;">@_incomingNumber</MudText>
 
         <MudPaper Elevation="0" Style="display: flex; justify-content: center; padding-bottom: 10%;z-index:1000">
             <MudFab Color="Color.Primary" Class="mr-5 answer-btn" StartIcon="@Icons.Material.Filled.Call" Size="Size.Large" OnClick="AnswerCall" />
@@ -43,6 +43,12 @@
         //     _showCall = true;
         //     StateHasChanged();
         // });
+
+        if (InfoStatic.PhoneNumber != string.Empty)
+        {
+            _incomingNumber = InfoStatic.PhoneNumber;
+        }
+
     }
 
     private void AnswerCall()

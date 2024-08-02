@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.JSInterop;
+using PayRemind.Data;
 using PayRemind.Messages;
+using System.Collections.Generic;
 
 namespace PayRemind
 {
@@ -40,11 +42,16 @@ namespace PayRemind
             {
 
                 SentrySdk.CaptureMessage("Recibiendo evento para cambiar de tab");
+                SentrySdk.CaptureMessage("llamada desde "+message.PhoneNumber);
 
+                InfoStatic.PhoneNumber = message.PhoneNumber ?? "";
 
-                if (message.TabIndex >= 0 && message.TabIndex < this.Children.Count)
+                if (message != null)
                 {
-                    this.CurrentPage = this.Children[message.TabIndex];
+                    if (message.TabIndex >= 0 && message.TabIndex < this.Children.Count)
+                    {
+                        this.CurrentPage = this.Children[message.TabIndex];
+                    }
                 }
             });
 

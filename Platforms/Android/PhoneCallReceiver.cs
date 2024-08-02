@@ -48,9 +48,7 @@ namespace PayRemind.Platforms.Android
             if (state == TelephonyManager.ExtraStateRinging)
             {
 
-                var serviceIntent = new Intent(context, typeof(CallService));
 
-                context.StartForegroundService(serviceIntent);
 
                 string incomingNumber = intent.GetStringExtra(TelephonyManager.ExtraIncomingNumber);
 
@@ -87,8 +85,11 @@ namespace PayRemind.Platforms.Android
                     context.StartActivity(launchIntent);
                 }
 
-                if (App.AppActive)
+                if (!App.AppActive)
                 {
+
+                    var serviceIntent = new Intent(context, typeof(CallService));
+                    context.StartForegroundService(serviceIntent);
 
 
                     //var startIntent = new Intent(context, typeof(MainActivity));

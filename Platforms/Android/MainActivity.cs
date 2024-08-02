@@ -55,8 +55,6 @@ namespace PayRemind
                 {
                     SentrySdk.CaptureMessage("Llegan los extras ");
 
-
-
                     //MessagingCenter.Send(this, "NavigateToTab", tabIndex);
 
                     //// Enviar el índice a la aplicación MAUI
@@ -77,10 +75,9 @@ namespace PayRemind
 
                 //MessagingCenter.Send(this, "NavigateToTab", 2);
 
-                SentrySdk.CaptureMessage("Llamada a OpenCallPage");
+                SentrySdk.CaptureMessage("Llamada a OpenCallPage222");
 
-
-                WeakReferenceMessenger.Default.Send(new TabIndexMessage(2));
+                WeakReferenceMessenger.Default.Send(new TabIndexMessage(2, incomingNumber ?? ""));
 
 
                 //OpenCallsTab();
@@ -138,15 +135,19 @@ namespace PayRemind
 
                     //WeakReferenceMessenger.Default.Send(new TabIndexMessage(2));
 
-                    var callsTabIndex = 2; // Índice de la pestaña "Calls"
-                    var bundle = new Bundle();
-                    bundle.PutInt("TabIndex", callsTabIndex);
-                    intent.PutExtras(bundle);
+                    //var callsTabIndex = 2; // Índice de la pestaña "Calls"
+                    //var bundle = new Bundle();
+                    //bundle.PutInt("TabIndex", callsTabIndex);
+                    //intent.PutExtras(bundle);
 
-                    StartActivity(intent);
+                    //StartActivity(intent);
 
 
-                    SentrySdk.CaptureMessage("Llamada a OnNewIntent");
+                    SentrySdk.CaptureMessage("Llamada de "+ incomingNumber);
+
+                    WeakReferenceMessenger.Default.Send(new TabIndexMessage(2, incomingNumber ?? ""));
+
+                    SentrySdk.CaptureMessage("Llamada a OnNewIntent Nueva");
 
 
                     // Realiza la acción necesaria

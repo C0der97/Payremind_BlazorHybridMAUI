@@ -140,6 +140,12 @@ Variant="Variant.Filled"
             await LocalNotificationCenter.Current.RequestNotificationPermission();
         }
 
+        await Permissions.RequestAsync<Permissions.Phone>();
+        // await Permissions.RequestAsync<Permissions.ContactsRead>();
+        await Permissions.RequestAsync<Permissions.Reminders>();
+        await Permissions.RequestAsync<Permissions.Speech>();
+
+
         dateTimePicker.NullableDateTimeChanged += OnNullableDateTimeChanged;
 
         notifications = await DatabaseService.GetNotificationsAsync(false);

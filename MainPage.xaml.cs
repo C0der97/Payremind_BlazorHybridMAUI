@@ -1,4 +1,6 @@
-﻿using Microsoft.JSInterop;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.JSInterop;
+using PayRemind.Messages;
 
 namespace PayRemind
 {
@@ -33,6 +35,33 @@ namespace PayRemind
                 }
             };
 
+
+            WeakReferenceMessenger.Default.Register<TabIndexMessage>(this, (r, message) =>
+            {
+
+                SentrySdk.CaptureMessage("Recibiendo evento para cambiar de tab");
+
+
+                if (message.TabIndex >= 0 && message.TabIndex < this.Children.Count)
+                {
+                    this.CurrentPage = this.Children[message.TabIndex];
+                }
+            });
+
+            //MainThread.BeginInvokeOnMainThread(() =>
+            //{
+            //    System.Diagnostics.Debug.WriteLine("Subscribing to NavigateToTab");
+            //    MessagingCenter.Subscribe<object, int>(this, "NavigateToTab", (sender, tabIndex) =>
+            //    {
+            //        System.Diagnostics.Debug.WriteLine($"Received NavigateToTab message with index {tabIndex}");
+            //        if (tabIndex >= 0 && tabIndex < this.Children.Count)
+            //        {
+            //            this.CurrentPage = this.Children[tabIndex];
+            //        }
+            //    });
+            //});
+
+
             //myDatePicker.MinimumDate = new DateTime(2000, 1, 1);
             //myDatePicker.MaximumDate = DateTime.Today;
         }
@@ -65,6 +94,11 @@ namespace PayRemind
             // Aquí puedes mostrar el DatePicker o realizar otra lógica
             // Este ejemplo es simplificado; puede necesitar ajustes según el caso de uso.
             return Task.CompletedTask;
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
         }
     }
 }

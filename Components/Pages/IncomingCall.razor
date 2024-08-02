@@ -1,0 +1,92 @@
+﻿@page "/calls"
+@inject IJSRuntime JSRuntime
+@inject ICallHandler CallHandler
+@using Microsoft.Maui.Controls
+@using PayRemind.Contracts
+
+
+@* class=" @(_showCall ? "call-container show" : "call-container")" *@
+
+<MudLayout  Style="height: 100vh">
+    <MudContainer MaxWidth="MaxWidth.Small" Style="height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 16px;">
+        <MudPaper Elevation="0" Style="background-color: transparent; display: flex; justify-content: center; padding-top: 20%;">
+            <MudAvatar Style="width: 120px; height: 120px; border: 4px solid white;">
+                <MudImage Src="https://img.freepik.com/free-photo/ultra-detailed-nebula-abstract-wallpaper-4_1562-749.jpg" Alt="Caller" ObjectFit="ObjectFit.Cover" Width="120" Height="120" Class="rounded-circle" />
+            </MudAvatar>
+        </MudPaper>
+
+        <MudText Typo="Typo.h2" Align="Align.Center" Style="color: yellow; margin-bottom: 16px;">@_incomingNumber</MudText>
+
+        <MudPaper Elevation="0" Style="display: flex; justify-content: center; padding-bottom: 10%;z-index:1000">
+            <MudFab Color="Color.Primary" Class="mr-5 answer-btn" StartIcon="@Icons.Material.Filled.Call" Size="Size.Large" OnClick="AnswerCall" />
+            <MudFab Color="Color.Secondary" Class="reject-btn" StartIcon="@Icons.Material.Filled.CallEnd" Size="Size.Large" OnClick="RejectCall" />
+        </MudPaper>
+    </MudContainer>
+</MudLayout>
+
+@* <div class="call-container @(_showCall ? "show" : "")">
+    <h2>Llamada entrante</h2>
+    <p>Número: @_incomingNumber</p>
+    <button @onclick="AnswerCall" class="answer-btn">Contestar</button>
+    <button @onclick="RejectCall" class="reject-btn">Rechazar</button>
+</div> *@
+
+@code {
+    private bool _showCall = false;
+    private string _incomingNumber = "Sin número";
+
+    protected override void OnInitialized()
+    {
+        // MessagingCenter.Subscribe<object, string>(this, "IncomingCall", (sender, number) =>
+        // {
+        //     _incomingNumber = number;
+        //     _showCall = true;
+        //     StateHasChanged();
+        // });
+    }
+
+    private void AnswerCall()
+    {
+        // Aquí iría la lógica para contestar la llamada
+
+        CallHandler.AnswerCall(); // Para responder
+
+        _showCall = false;
+    }
+
+    private void RejectCall()
+    {
+
+        CallHandler.RejectCall(); // Para rechazar
+        // Aquí iría la lógica para rechazar la llamada
+        _showCall = false;
+    }
+}
+
+<style>
+    .call-container {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+        .call-container.show {
+            display: block;
+        }
+
+    .answer-btn {
+        background-color: green;
+        color: white;
+    }
+
+    .reject-btn {
+        background-color: red;
+        color: white;
+    }
+</style>

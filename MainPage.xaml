@@ -33,6 +33,16 @@
                 </BlazorWebView.RootComponents>
             </BlazorWebView>
         </ContentPage>
-        
+
+
+
+        <ContentPage Title="Llamadas" IconImageSource="lista.png"  >
+            <BlazorWebView x:Name="blazorWebViewCalss" HostPage="wwwroot/index.html" StartPath="/calls">
+                <BlazorWebView.RootComponents>
+                    <RootComponent Selector="#app"  ComponentType="{x:Type pages:IncomingCall}" />
+                </BlazorWebView.RootComponents>
+            </BlazorWebView>
+        </ContentPage>
+
     </TabbedPage.Children>
 </TabbedPage>

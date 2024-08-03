@@ -1,106 +1,69 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Telecom;
 using Android.Telephony;
 using Android.Util;
-using CommunityToolkit.Mvvm.Messaging;
-using PayRemind.Messages;
+using Android.Widget;
 
 namespace PayRemind.Platforms.Android
 {
     [BroadcastReceiver(Enabled = true, Exported = true)]
-    [IntentFilter(new[] { TelephonyManager.ActionPhoneStateChanged })]
+    [IntentFilter([TelephonyManager.ActionPhoneStateChanged, "ANSWER", "HANGUP"  ])]
     public class PhoneCallReceiver : BroadcastReceiver
     {
         public override void OnReceive(Context context, Intent intent)
         {
-            if (intent.Action != TelephonyManager.ActionPhoneStateChanged)
+            string? action = intent.Action;
+
+
+            if (action != TelephonyManager.ActionPhoneStateChanged && action != "ANSWER" && action != "HANGUP")
             {
                 Log.Debug("Cosa", "Received intent with non-phone state action");
                 return;
 
             }
 
-            //string state = intent.GetStringExtra(TelephonyManager.ExtraState);
-            //if (state == TelephonyManager.ExtraStateRinging)
-            //{
-            //    string incomingNumber = intent.GetStringExtra(TelephonyManager.ExtraIncomingNumber);
-            //    MainThread.BeginInvokeOnMainThread(() =>
-            //    {
-            //        MessagingCenter.Send<object, string>(this, "IncomingCall", incomingNumber);
-            //    });
 
-            //}
+            if (action == "ANSWER")
+            {
+                TelecomManager? telecomManager = context.GetSystemService(Context.TelecomService) as TelecomManager;
 
+                telecomManager?.AcceptRingingCall();
 
-            //string state = intent.GetStringExtra(TelephonyManager.ExtraState);
-            //if (state == TelephonyManager.ExtraStateRinging)
-            //{
-            //    string incomingNumber = intent.GetStringExtra(TelephonyManager.ExtraIncomingNumber);
-
-            //    // Abre la aplicación y navega a la página de llamadas
-            //    var startIntent = new Intent(context, typeof(MainActivity));
-            //    startIntent.AddFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
-            //    startIntent.PutExtra("OpenCallPage", true);
-            //    startIntent.PutExtra("IncomingNumber", incomingNumber);
-            //    context.StartActivity(startIntent);
-            //}
+                Toast.MakeText(context, "Contestar Llamada", ToastLength.Short)
+                    .Show();
+            }
+            else if (action == "HANGUP")
+            {
+                TelecomManager? telecomManager = context.GetSystemService(Context.TelecomService) as TelecomManager;
 
 
-            string state = intent.GetStringExtra(TelephonyManager.ExtraState);
+                if (telecomManager != null && context != null)
+                {
+                    telecomManager?.EndCall();
+
+                    Toast.MakeText(context, "Colgar Llamada", ToastLength.Short).Show();
+                }
+
+                }
+
+
+                string? state = intent.GetStringExtra(TelephonyManager.ExtraState);
             if (state == TelephonyManager.ExtraStateRinging)
             {
 
-
-
-                string incomingNumber = intent.GetStringExtra(TelephonyManager.ExtraIncomingNumber);
-
+                string? incomingNumber = intent?.GetStringExtra(name: 
+                    TelephonyManager.ExtraIncomingNumber
+                    );
 
                 SentrySdk.CaptureMessage("Recibiendo llamada número "+incomingNumber);
 
-
-                //MainThread.BeginInvokeOnMainThread(() =>
-                //{
-                //    MessagingCenter.Send(this, "NavigateToTab", 2);
-                //});
-
-
-
-                //// Abre la aplicación y navega a la página de llamadas
-                ///
-
-
-
-
-                //Intent launchIntent = context.PackageManager.GetLaunchIntentForPackage("com.companyname.payremind");
-
-
                 var serviceIntent = new Intent(context, typeof(CallService));
-                context.StartForegroundService(serviceIntent);
-
-                //var launchIntent = new Intent(context, typeof(MainActivity));
-
-                //if (launchIntent != null)
-                //{
-
-                //    SentrySdk.CaptureMessage("Invocando launchIntent");
-
-
-                //    launchIntent.AddFlags(ActivityFlags.NewTask);
-                //    launchIntent.PutExtra("OpenCallPage", true);
-                //    launchIntent.PutExtra("incoming_number", incomingNumber);
-                //    launchIntent.PutExtra("IncomingNumber", incomingNumber);
-                //    context.StartActivity(launchIntent);
-                //}
-
-
+                _ = context.StartForegroundService(serviceIntent);
 
 
                 if (!App.AppActive)
                 {
-
-                 
-
-
                     //var startIntent = new Intent(context, typeof(MainActivity));
                     ////startIntent.AddFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
                     //startIntent.AddFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
@@ -110,16 +73,20 @@ namespace PayRemind.Platforms.Android
                 }
                 else
                 {
-                    //WeakReferenceMessenger.Default.Send(new TabIndexMessage(2));
-
+                        // Abre la aplicación y navega a la página de llamadas
+                        //var startIntent = new Intent(context, typeof(MainActivity));
+                        //startIntent.AddFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
+                        intent?.PutExtra("OpenCallPage", true);
+                        intent?.PutExtra("IncomingNumber", incomingNumber);
+                        //context.StartActivity(startIntent);
                 }
             }
             else if(state == TelephonyManager.ExtraStateIdle)
             {
-                //WeakReferenceMessenger.Default.Send(new TabIndexMessage(true));
-
-                Microsoft.Maui.Controls.Application.Current.MainPage = new MainPage();
-
+                if (Microsoft.Maui.Controls.Application.Current != null)
+                {
+                    Microsoft.Maui.Controls.Application.Current.MainPage = new MainPage();
+                }
             }
 
         }

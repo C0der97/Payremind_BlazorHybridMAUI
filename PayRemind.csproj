@@ -76,7 +76,7 @@
 
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#221f2d" />
+		
 
         <!-- Splash Screen -->
         <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#221f2d" BaseSize="512, 512" />
@@ -92,6 +92,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Remove="Resources\AppIcon\appiconnew.svg" />
       <None Remove="Resources\Images\lista.png" />
       <None Remove="Resources\Images\reloj.png" />
       <None Remove="Resources\Images\ringphone.png" />
@@ -122,6 +123,7 @@
 
     <ItemGroup>
       <Folder Include="Components\Layout\" />
+      <Folder Include="Resources\AppIcon\" />
       <Folder Include="wwwroot\NewFolder\" />
     </ItemGroup>
 

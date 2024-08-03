@@ -1,10 +1,8 @@
 ﻿using Android.Content;
-using Android.Runtime;
 using Android.Telecom;
 using Android.Telephony;
 using PayRemind.Contracts;
 using PayRemind.Platforms.Android;
-using CallState = Android.Telephony.CallState;
 
 
 [assembly: Dependency(typeof(CallHandlingService))]

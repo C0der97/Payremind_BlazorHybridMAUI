@@ -1,15 +1,12 @@
-﻿using Android;
-using Android.App;
+﻿using Android.App;
 using Android.App.Roles;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
-using AndroidX.Core.App;
-using AndroidX.Core.Content;
+using Android.Telephony;
 using CommunityToolkit.Mvvm.Messaging;
 using PayRemind.Messages;
 using PayRemind.Pages;
-using PayRemind.Platforms.Android;
 
 namespace PayRemind
 {
@@ -20,10 +17,13 @@ namespace PayRemind
         ConfigChanges.Orientation | ConfigChanges.UiMode | 
         ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | 
         ConfigChanges.Density)]
+    [IntentFilter([Intent.ActionDial], Categories = [Intent.CategoryDefault])]
+    [IntentFilter([Intent.ActionView], Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
+
     public class MainActivity : MauiAppCompatActivity
     {
-        public static MainActivity ActivityCurrent { get; set; }
-        private static int REQUEST_ID = 1;
+        public static MainActivity? ActivityCurrent { get; set; }
+        private static int REQUEST_ID = 1007;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -34,53 +34,40 @@ namespace PayRemind
             App.AppActive = true;
 
 
-            if (Intent.HasExtra("incoming_number"))
+            if (Intent != null && Intent.HasExtra("incoming_number"))
             {
                 var incomingNumber = Intent.GetStringExtra("incoming_number");
-                //Microsoft.Maui.Controls.Application.Current.MainPage = new CallPage(incomingNumber);
 
-                Microsoft.Maui.Controls.Application.Current.MainPage = new NavigationPage(new CallPage(incomingNumber));
-
+                if (Microsoft.Maui.Controls.Application.Current != null)
+                {
+                    Microsoft.Maui.Controls.Application.Current.MainPage = new NavigationPage(new CallPage(incomingNumber));
+                }
             }
 
 
-            if (savedInstanceState == null)
+            if (savedInstanceState == null && Build.VERSION.SdkInt >= BuildVersionCodes.N)
             {
-                RoleManager roleManager = (RoleManager)GetSystemService(RoleService);
                 // Verificar si se debe abrir una página específica
 
-                Intent intent = roleManager.CreateRequestRoleIntent(RoleManager.RoleCallScreening);
-                StartActivityForResult(intent, REQUEST_ID);
-
-
-                if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.ManageOwnCalls) != Permission.Granted)
+                if (GetSystemService(name: RoleService) is RoleManager roleManager)
                 {
-                    ActivityCompat.RequestPermissions(this, new String[] { Manifest.Permission.ManageOwnCalls }, 1001);
+                    Intent? intent = roleManager?.CreateRequestRoleIntent(
+                        RoleManager.RoleCallScreening);
+                    StartActivityForResult(intent, REQUEST_ID);
                 }
 
-
-                //var serviceIntent = new Intent(this, typeof(CallService));
-                //StartForegroundService(serviceIntent);
             }
 
+            //var serviceIntent = new Intent(this, typeof(CallService));
+            //StartForegroundService(serviceIntent);
 
-        
 
-            if (Intent.GetBooleanExtra("OpenCallPage", false))
+            if (Intent != null &&  Intent.GetBooleanExtra("OpenCallPage", false))
             {
-                string incomingNumber = Intent.GetStringExtra("IncomingNumber");
-                // Navega a la página de llamadas (esto dependerá de cómo esté estructurada tu app)
-                // Por ejemplo, podrías usar un evento global o un servicio de mensajería
-                // para notificar a tu Blazor WebView que debe navegar a la página de llamadas
-                // y pasar el número entrante.
-
-                //MessagingCenter.Send(this, "NavigateToTab", 2);
-
+                string? incomingNumber = Intent.GetStringExtra("IncomingNumber");
                 SentrySdk.CaptureMessage("Llamada a OpenCallPage222");
 
                 WeakReferenceMessenger.Default.Send(new TabIndexMessage(2, incomingNumber ?? ""));
-
-
                 //OpenCallsTab();
             }
         }

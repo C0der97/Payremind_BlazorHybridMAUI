@@ -8,7 +8,7 @@ namespace PayRemind
 {
     public partial class MainPage : TabbedPage
     {
-        AppTheme currentTheme = Application.Current.RequestedTheme;
+        private readonly AppTheme currentTheme = Application.Current == null ? AppTheme.Dark : Application.Current.RequestedTheme;
 
         private DateTime _selectedDateTime;
         public MainPage()
@@ -25,17 +25,23 @@ namespace PayRemind
                 this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#32323d"), Color.FromArgb("#32323d"));
             }
 
-            Application.Current.RequestedThemeChanged += (s, a) =>
+
+            if (Application.Current != null)
             {
-                if (a.RequestedTheme == AppTheme.Light)
+                Application.Current.RequestedThemeChanged += (s, a) =>
                 {
-                    this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#ffffff"), Color.FromArgb("#ffffff"));
-                }
-                else
-                {
-                    this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#32323d"), Color.FromArgb("#32323d"));
-                }
-            };
+                    if (a.RequestedTheme == AppTheme.Light)
+                    {
+                        this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#ffffff"), Color.FromArgb("#ffffff"));
+                    }
+                    else
+                    {
+                        this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#32323d"), Color.FromArgb("#32323d"));
+                    }
+                };
+            }
+
+
 
 
             WeakReferenceMessenger.Default.Register<TabIndexMessage>(this, (r, message) =>

@@ -3,7 +3,9 @@ using Android.App.Roles;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
-using Android.Telephony;
+using Android.Telecom;
+using Android.Util;
+using Android.Widget;
 using CommunityToolkit.Mvvm.Messaging;
 using PayRemind.Messages;
 using PayRemind.Pages;
@@ -45,18 +47,90 @@ namespace PayRemind
             }
 
 
-            if (savedInstanceState == null && Build.VERSION.SdkInt >= BuildVersionCodes.N)
-            {
-                // Verificar si se debe abrir una página específica
 
-                if (GetSystemService(name: RoleService) is RoleManager roleManager)
+            if (savedInstanceState == null)
+            {
+
+
+                if (savedInstanceState == null && Build.VERSION.SdkInt >= BuildVersionCodes.N)
                 {
-                    Intent? intent = roleManager?.CreateRequestRoleIntent(
-                        RoleManager.RoleCallScreening);
-                    StartActivityForResult(intent, REQUEST_ID);
+                    // Verificar si se debe abrir una página específica
+
+                    if (GetSystemService(name: RoleService) is RoleManager roleManager)
+                    {
+                        Intent? intent = roleManager?.CreateRequestRoleIntent(
+                            RoleManager.RoleCallScreening);
+                        StartActivityForResult(intent, REQUEST_ID);
+                    }
+
                 }
 
+
+
+//                bool isQPlus = Build.VERSION.SdkInt >= BuildVersionCodes.Q;
+
+//                if (isQPlus)
+//                {
+//                    Log.Debug("Cosa", "entra en isQPlus");
+
+//                    SetDefaultCallerIdApp();
+//                }
+//                else
+//                {
+//                    Log.Debug("Cosa", "no entra en isQPlus");
+
+
+//                    if (OperatingSystem.IsAndroidVersionAtLeast(29)
+//                        && GetSystemService(name: RoleService) is RoleManager roleManager)  // Android Q (API 29) y superior
+//                    {
+//                        if (roleManager != null &&
+//                            roleManager.IsRoleAvailable(RoleManager.RoleDialer) &&
+//                            !roleManager.IsRoleHeld(RoleManager.RoleDialer))
+//                        {
+//                            var intent = roleManager.CreateRequestRoleIntent(RoleManager.RoleDialer);
+//                            //Platform.CurrentActivity?.StartActivityForResult(intent, 1007);
+//                            StartActivityForResult(intent, 1007);
+
+//                        }
+//                    }
+//                    else
+//                    {
+//                        Intent intent = new Intent(TelecomManager.ActionChangeDefaultDialer)
+//                            .PutExtra(TelecomManager.ExtraChangeDefaultDialerPackageName,
+//                            Platform.CurrentActivity?.PackageName);
+//                        try
+//                        {
+//                            //Platform.CurrentActivity?.StartActivityForResult(intent, 1007);
+
+//                            StartActivityForResult(intent, 1007);
+
+//                        }
+//                        catch (ActivityNotFoundException)
+//                        {
+//                            // Toast.MakeText(Platform.CurrentActivity, "No app found", ToastLength.Short).Show();
+//                            // O usa el sistema de notificación de MAUI:
+//                            MainThread.BeginInvokeOnMainThread(() =>
+//                            {
+//#pragma warning disable CS8602 // Desreferencia de una referencia posiblemente NULL.
+//                                Toast.MakeText(this, "ERORR", ToastLength.Short)
+//                                           .Show();
+//#pragma warning restore CS8602 // Desreferencia de una referencia posiblemente NULL.
+//                            });
+//                        }
+//                        catch (Exception ex)
+//                        {
+//#pragma warning disable CS8602 // Desreferencia de una referencia posiblemente NULL.
+//                            Toast.MakeText(this, "ERORR", ToastLength.Short)
+//                                          .Show();
+//#pragma warning restore CS8602 // Desreferencia de una referencia posiblemente NULL.
+//                        }
+//                    }
+//                }
+
+
             }
+
+        
 
             //var serviceIntent = new Intent(this, typeof(CallService));
             //StartForegroundService(serviceIntent);
@@ -68,38 +142,34 @@ namespace PayRemind
                 SentrySdk.CaptureMessage("Llamada a OpenCallPage222");
 
                 WeakReferenceMessenger.Default.Send(new TabIndexMessage(2, incomingNumber ?? ""));
-                //OpenCallsTab();
             }
-        }
-
-
-        private void OpenCallsTab()
-        {
-            var intent = new Intent(this, typeof(MainActivity));
-            intent.AddFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
-
-            var callsTabIndex = 2; // Índice de la pestaña "Calls"
-            var bundle = new Bundle();
-            bundle.PutInt("TabIndex", callsTabIndex);
-            intent.PutExtras(bundle);
-
-            StartActivity(intent);
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent
                                              data)
         {
             base.OnActivityResult(requestCode, resultCode, data);
+
+            Log.Debug("Cosa", "Obteniendo respuesta ");
+
+
             if (requestCode == REQUEST_ID)
             {
                 if (resultCode == Result.Ok)
                 {
+                    Log.Debug("Cosa", "aceptado como default");
 
 
+                    WeakReferenceMessenger.Default.Send(new TabIndexMessage(true, "Aceptada"));
                 }
                 else
                 {
-                    // The resultCode is always Canceled
+                    Log.Debug("Cosa", "No aceptado como default");
+
+
+                    Toast.MakeText(this, "No aceptado como default", ToastLength.Short)
+                                     .Show();
+
                 }
             }
 
@@ -122,27 +192,42 @@ namespace PayRemind
                 if (intent.GetBooleanExtra("OpenCallPage", false))
                 {
                     string incomingNumber = intent.GetStringExtra("IncomingNumber");
-
-                    //WeakReferenceMessenger.Default.Send(new TabIndexMessage(2));
-
-                    //var callsTabIndex = 2; // Índice de la pestaña "Calls"
-                    //var bundle = new Bundle();
-                    //bundle.PutInt("TabIndex", callsTabIndex);
-                    //intent.PutExtras(bundle);
-
-                    //StartActivity(intent);
-
-
-                    SentrySdk.CaptureMessage("Llamada de "+ incomingNumber);
-
-                    //WeakReferenceMessenger.Default.Send(new TabIndexMessage(2, incomingNumber ?? ""));
-
-                    SentrySdk.CaptureMessage("Llamada a OnNewIntent Nueva");
-
-
-                    // Realiza la acción necesaria
                 }
             }
         }
+
+        private void SetDefaultCallerIdApp()
+        {
+            RoleManager? roleManager = GetSystemService(Context.RoleService) as RoleManager;
+#pragma warning disable CS8602 // Desreferencia de una referencia posiblemente NULL.
+           
+            
+            //OLD BAD
+            //if (roleManager.IsRoleAvailable(RoleManager.RoleCallScreening) && !roleManager.IsRoleHeld(RoleManager.RoleCallScreening))
+            //{
+            //    Intent? intent = roleManager?.CreateRequestRoleIntent(RoleManager.RoleCallScreening);
+            //    //StartActivityForResult(intent, 1010);
+            //    Platform.CurrentActivity?.StartActivityForResult(intent, REQUEST_ID);
+
+
+
+
+            //}
+
+
+
+            if (roleManager != null &&
+                   roleManager.IsRoleAvailable(RoleManager.RoleDialer) &&
+                   !roleManager.IsRoleHeld(RoleManager.RoleDialer))
+            {
+                var intent = roleManager.CreateRequestRoleIntent(RoleManager.RoleDialer);
+                //Platform.CurrentActivity?.StartActivityForResult(intent, 1007);
+                StartActivityForResult(intent, REQUEST_ID);
+            }
+
+
+#pragma warning restore CS8602 // Desreferencia de una referencia posiblemente NULL.
+        }
+
     }
 }

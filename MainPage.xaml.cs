@@ -2,6 +2,7 @@
 using Microsoft.JSInterop;
 using PayRemind.Data;
 using PayRemind.Messages;
+using Plugin.LocalNotification;
 using System.Collections.Generic;
 
 namespace PayRemind
@@ -41,24 +42,42 @@ namespace PayRemind
                 };
             }
 
-
-
-
-            WeakReferenceMessenger.Default.Register<TabIndexMessage>(this, (r, message) =>
+            WeakReferenceMessenger.Default.Register<TabIndexMessage>(this, async (r, message) =>
             {
-
-                SentrySdk.CaptureMessage("Recibiendo evento para cambiar de tab");
-                SentrySdk.CaptureMessage("llamada desde "+message.PhoneNumber);
-
                 InfoStatic.PhoneNumber = message.PhoneNumber ?? "";
 
                 if (message != null)
                 {
-                    if (message.TabIndex >= 0 && message.TabIndex < this.Children.Count)
+                    if (!message.DefaultApp)
                     {
-                        this.CurrentPage = this.Children[message.TabIndex];
+                        return;
                     }
+
+                    //if (message.TabIndex >= 0 && message.TabIndex < this.Children.Count)
+                    //{
+                    //    this.CurrentPage = this.Children[message.TabIndex];
+                    //}
+
                 }
+
+
+                if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
+                {
+                    await LocalNotificationCenter.Current.RequestNotificationPermission();
+                }
+
+                await Permissions.RequestAsync<Permissions.Phone>();
+                await Permissions.RequestAsync<Permissions.Sms>();
+                await Permissions.RequestAsync<Permissions.ContactsRead>();
+                await Permissions.RequestAsync<Permissions.Reminders>();
+                await Permissions.RequestAsync<Permissions.Speech>();
+                await Permissions.RequestAsync<Permissions.Battery>();
+                await Permissions.RequestAsync<Permissions.PostNotifications>();
+                await Permissions.RequestAsync<Permissions.StorageRead>();
+                await Permissions.RequestAsync<Permissions.StorageWrite>();
+                await Permissions.RequestAsync<Permissions.Microphone>();
+                await Permissions.RequestAsync<Permissions.ContactsWrite>();
+
             });
 
             //MainThread.BeginInvokeOnMainThread(() =>

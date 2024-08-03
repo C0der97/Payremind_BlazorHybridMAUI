@@ -10,7 +10,10 @@
 @implements IDisposable
 
 
+@using CommunityToolkit.Mvvm.Messaging
 @using Maui.NullableDateTimePicker
+@using MudBlazor
+@using PayRemind.Messages
 @using PayRemind.Shared
 @using Plugin.LocalNotification
 @using Microsoft.Extensions.DependencyInjection
@@ -135,22 +138,7 @@ Variant="Variant.Filled"
             _isDarkMode = true;
         }
 
-        if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
-        {
-            await LocalNotificationCenter.Current.RequestNotificationPermission();
-        }
 
-        await Permissions.RequestAsync<Permissions.Phone>();
-        await Permissions.RequestAsync<Permissions.Sms>();
-        await Permissions.RequestAsync<Permissions.ContactsRead>();
-        await Permissions.RequestAsync<Permissions.Reminders>();
-        await Permissions.RequestAsync<Permissions.Speech>();
-        await Permissions.RequestAsync<Permissions.Battery>();
-        await Permissions.RequestAsync<Permissions.PostNotifications>();
-        await Permissions.RequestAsync<Permissions.StorageRead>();
-        await Permissions.RequestAsync<Permissions.StorageWrite>();
-        await Permissions.RequestAsync<Permissions.Microphone>();
-        await Permissions.RequestAsync<Permissions.ContactsWrite>();
 
 
         dateTimePicker.NullableDateTimeChanged += OnNullableDateTimeChanged;

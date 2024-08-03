@@ -2,14 +2,16 @@
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+using Android.Telecom;
 using AndroidX.Core.App;
 
 namespace PayRemind.Platforms.Android
 {
     [Service(ForegroundServiceType = global::Android.Content.PM.ForegroundService.TypePhoneCall,
         Enabled = true,
-        Exported = true)]
-    public class CallService : Service
+        Exported = true,
+        Permission = "android.permission.BIND_INCALL_SERVICE")]
+    public class CallService : InCallService
     {
         public override IBinder OnBind(Intent intent)
         {

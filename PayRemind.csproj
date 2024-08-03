@@ -24,7 +24,7 @@
         <ApplicationTitle>PayRemind</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.payremind</ApplicationId>
+        <ApplicationId>com.retrocode.payremind</ApplicationId>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -44,6 +44,7 @@
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
       <ApplicationTitle>PayRemindRMK</ApplicationTitle>
+      <AndroidKeyStore>False</AndroidKeyStore>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-maccatalyst|AnyCPU'">
@@ -60,6 +61,7 @@
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
       <ApplicationTitle>PayRemindRMK</ApplicationTitle>
+      <AndroidKeyStore>False</AndroidKeyStore>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-maccatalyst|AnyCPU'">
@@ -93,6 +95,7 @@
 
     <ItemGroup>
       <None Remove="Resources\AppIcon\appiconnew.svg" />
+      <None Remove="Resources\AppIcon\icon.png" />
       <None Remove="Resources\Images\lista.png" />
       <None Remove="Resources\Images\reloj.png" />
       <None Remove="Resources\Images\ringphone.png" />
@@ -123,8 +126,11 @@
 
     <ItemGroup>
       <Folder Include="Components\Layout\" />
-      <Folder Include="Resources\AppIcon\" />
       <Folder Include="wwwroot\NewFolder\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <MauiIcon Include="Resources\AppIcon\icon.png" />
     </ItemGroup>
 
 </Project>

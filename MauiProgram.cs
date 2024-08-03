@@ -26,7 +26,7 @@ namespace PayRemind
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             }).UseMauiCommunityToolkit().UseSentry(options => {
                 // The DSN is the only required setting.
-                options.Dsn = "";
+                options.Dsn = "https://42213245402bf788a901d07f056950d4@o4507708174958592.ingest.us.sentry.io/4507708177448960";
 
                 // Use debug mode if you want to see what the SDK is doing.
                 // Debug messages are written to stdout with Console.Writeline,

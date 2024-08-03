@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PayRemind.Pages.CallPage"
+             Title="CallPage"
+             xmlns:pages="clr-namespace:PayRemind.Components.Pages"
+             >
+    <StackLayout VerticalOptions="Center" HorizontalOptions="Center">
+        <BlazorWebView x:Name="blazorWebViewCalss" HostPage="wwwroot/index.html">
+            <BlazorWebView.RootComponents>
+                <RootComponent Selector="#app"  ComponentType="{x:Type pages:IncomingCall}" />
+            </BlazorWebView.RootComponents>
+        </BlazorWebView>
+    </StackLayout>
+</ContentPage>

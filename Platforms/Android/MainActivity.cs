@@ -1,10 +1,15 @@
-﻿using Android.App;
+﻿using Android;
+using Android.App;
 using Android.App.Roles;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+using AndroidX.Core.App;
+using AndroidX.Core.Content;
 using CommunityToolkit.Mvvm.Messaging;
 using PayRemind.Messages;
+using PayRemind.Pages;
+using PayRemind.Platforms.Android;
 
 namespace PayRemind
 {
@@ -29,6 +34,15 @@ namespace PayRemind
             App.AppActive = true;
 
 
+            if (Intent.HasExtra("incoming_number"))
+            {
+                var incomingNumber = Intent.GetStringExtra("incoming_number");
+                //Microsoft.Maui.Controls.Application.Current.MainPage = new CallPage(incomingNumber);
+
+                Microsoft.Maui.Controls.Application.Current.MainPage = new NavigationPage(new CallPage(incomingNumber));
+
+            }
+
 
             if (savedInstanceState == null)
             {
@@ -37,6 +51,12 @@ namespace PayRemind
 
                 Intent intent = roleManager.CreateRequestRoleIntent(RoleManager.RoleCallScreening);
                 StartActivityForResult(intent, REQUEST_ID);
+
+
+                if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.ManageOwnCalls) != Permission.Granted)
+                {
+                    ActivityCompat.RequestPermissions(this, new String[] { Manifest.Permission.ManageOwnCalls }, 1001);
+                }
 
 
                 //var serviceIntent = new Intent(this, typeof(CallService));
@@ -104,6 +124,14 @@ namespace PayRemind
 
             if (intent != null)
             {
+
+                if (intent.GetStringExtra("incoming_number") != string.Empty)
+                {
+                    var incomingNumber = intent.GetStringExtra("incoming_number");
+                    Microsoft.Maui.Controls.Application.Current.MainPage = new CallPage(incomingNumber);
+                }
+
+
                 if (intent.GetBooleanExtra("OpenCallPage", false))
                 {
                     string incomingNumber = intent.GetStringExtra("IncomingNumber");
@@ -120,7 +148,7 @@ namespace PayRemind
 
                     SentrySdk.CaptureMessage("Llamada de "+ incomingNumber);
 
-                    WeakReferenceMessenger.Default.Send(new TabIndexMessage(2, incomingNumber ?? ""));
+                    //WeakReferenceMessenger.Default.Send(new TabIndexMessage(2, incomingNumber ?? ""));
 
                     SentrySdk.CaptureMessage("Llamada a OnNewIntent Nueva");
 

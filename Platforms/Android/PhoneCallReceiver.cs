@@ -2,6 +2,8 @@
 using Android.Content;
 using Android.Telephony;
 using Android.Util;
+using CommunityToolkit.Mvvm.Messaging;
+using PayRemind.Messages;
 
 namespace PayRemind.Platforms.Android
 {
@@ -71,25 +73,32 @@ namespace PayRemind.Platforms.Android
 
                 //Intent launchIntent = context.PackageManager.GetLaunchIntentForPackage("com.companyname.payremind");
 
-                var launchIntent = new Intent(context, typeof(MainActivity));
 
-                if (launchIntent != null)
-                {
+                var serviceIntent = new Intent(context, typeof(CallService));
+                context.StartForegroundService(serviceIntent);
 
-                    SentrySdk.CaptureMessage("Invocando launchIntent");
+                //var launchIntent = new Intent(context, typeof(MainActivity));
+
+                //if (launchIntent != null)
+                //{
+
+                //    SentrySdk.CaptureMessage("Invocando launchIntent");
 
 
-                    launchIntent.AddFlags(ActivityFlags.NewTask);
-                    launchIntent.PutExtra("OpenCallPage", true);
-                    launchIntent.PutExtra("IncomingNumber", incomingNumber);
-                    context.StartActivity(launchIntent);
-                }
+                //    launchIntent.AddFlags(ActivityFlags.NewTask);
+                //    launchIntent.PutExtra("OpenCallPage", true);
+                //    launchIntent.PutExtra("incoming_number", incomingNumber);
+                //    launchIntent.PutExtra("IncomingNumber", incomingNumber);
+                //    context.StartActivity(launchIntent);
+                //}
+
+
+
 
                 if (!App.AppActive)
                 {
 
-                    //var serviceIntent = new Intent(context, typeof(CallService));
-                    //context.StartForegroundService(serviceIntent);
+                 
 
 
                     //var startIntent = new Intent(context, typeof(MainActivity));
@@ -104,6 +113,13 @@ namespace PayRemind.Platforms.Android
                     //WeakReferenceMessenger.Default.Send(new TabIndexMessage(2));
 
                 }
+            }
+            else if(state == TelephonyManager.ExtraStateIdle)
+            {
+                //WeakReferenceMessenger.Default.Send(new TabIndexMessage(true));
+
+                Microsoft.Maui.Controls.Application.Current.MainPage = new MainPage();
+
             }
 
         }

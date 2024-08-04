@@ -101,6 +101,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Remove="Platforms\Android\Resources\drawable\rounded_button.xml" />
+      <None Remove="Platforms\Android\Resources\drawable\rounded_button_green.xml" />
+      <None Remove="Platforms\Android\Resources\layout\notification_custom.xml" />
+      <None Remove="Platforms\Android\Resources\layout\notification_custom_small.xml" />
       <None Remove="Resources\AppIcon\appiconnew.svg" />
       <None Remove="Resources\AppIcon\icon.png" />
       <None Remove="Resources\Images\lista.png" />

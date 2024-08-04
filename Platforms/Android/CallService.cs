@@ -1,10 +1,17 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.Content.PM;
+using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Telecom;
+using Android.Views;
+using Android.Widget;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
+using AndroidX.Core.Graphics.Drawable;
+using Microsoft.Maui.Controls.PlatformConfiguration;
+using static Android.Icu.Text.CaseMap;
+using Person = Android.App.Person;
 
 namespace PayRemind.Platforms.Android
 {
@@ -74,14 +81,61 @@ namespace PayRemind.Platforms.Android
             intentHangup.SetAction("HANGUP");
             var pendingIntentHangup = PendingIntent.GetBroadcast(this, 1, intentHangup, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
 
+
+            global::Android.Graphics.Drawables.Drawable? persIcon = ContextCompat.GetDrawable(
+                                            this, Resource.Drawable.ic_call_answer_low);
+
+
+            IconCompat iconNotif = IconCompat.CreateWithResource(this, Resource.Drawable.ic_call_answer_low);
+
+            Icon personI =  Icon.CreateWithResource(this, Resource.Drawable.ic_call_answer_low);
+
+            
+            Person person = new Person.Builder()
+                .SetName("Pepe Guama")
+                .SetImportant(true)
+                .SetIcon(personI)
+                .Build();
+
+            //LayoutInflater? layoutInflater = GetSystemService(LayoutInflaterService) as LayoutInflater;
+
+            //global::Android.Views.View? view = layoutInflater?.Inflate(Resource.Layout.notification_custom, null);
+
+
+            RemoteViews remoteViews = new RemoteViews(Platform.CurrentActivity?.PackageName, Resource.Layout.notification_custom);
+
+            remoteViews.SetOnClickPendingIntent(Resource.Id.button_accept_call, pendingIntentAnswer);
+            remoteViews.SetOnClickPendingIntent(Resource.Id.button_decline_call, pendingIntentHangup);
+            remoteViews.SetTextViewText(Resource.Id.notification_caller_name, "Pepe Guama");
+            remoteViews.SetTextViewText(Resource.Id.button_accept_call, "Contestar");
+            remoteViews.SetTextViewText(Resource.Id.button_decline_call, "Colgar");
+
+
+            RemoteViews remoteViewsSmall = new RemoteViews(Platform.CurrentActivity?.PackageName, Resource.Layout.notification_custom_small);
+
+
+            remoteViewsSmall.SetOnClickPendingIntent(Resource.Id.button_accept_call, pendingIntentAnswer);
+            remoteViewsSmall.SetOnClickPendingIntent(Resource.Id.button_decline_call, pendingIntentHangup);
+            remoteViewsSmall.SetTextViewText(Resource.Id.button_accept_call, "Contestar");
+            remoteViewsSmall.SetTextViewText(Resource.Id.button_decline_call, "Colgar");
+
+            //var notificationStyle = Notification.CallStyle.ForIncomingCall(
+            //    person,
+            //    declineIntent,
+            //    answerIntent)
+
             var notificationBuilder = new NotificationCompat.Builder(this, channelId)
                 .SetContentTitle("Llamada entrante")
                 .SetContentText("Tiene una llamada entrante.")
-                .SetSmallIcon(Resource.Drawable.ic_call_answer_low) // Ensure you have this drawable
-                .AddAction(Resource.Drawable.ic_call_answer, "Answer", pendingIntentAnswer)
-                .AddAction(Resource.Drawable.ic_call_decline, "Hang Up", pendingIntentHangup)
+                .SetSmallIcon(iconNotif) // Ensure you have this drawable
+                //.AddAction(Resource.Drawable.ic_call_answer, "Contestar", pendingIntentAnswer)
+                //.AddAction(Resource.Drawable.ic_call_decline, "Colgar", pendingIntentHangup)
                 .SetPriority(NotificationCompat.PriorityHigh)
-                .SetOngoing(true);
+                .SetCustomBigContentView(remoteViews)
+                .SetStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .SetCustomContentView(remoteViewsSmall)
+                .SetOngoing(true)
+                .SetAutoCancel(true);
 
             Notification notification = notificationBuilder.Build();
 

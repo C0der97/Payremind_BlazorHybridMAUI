@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/notification_caller_name"
+        android:layout_width="523.8dp"
+        android:layout_height="wrap_content"
+        android:textSize="23dp"
+        android:textAlignment="center"
+        android:text="Caller Name" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:layout_marginTop="29dp"
+>
+        <Button
+            android:id="@+id/button_accept_call"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="Contestar"
+            android:textColor="#000000"
+            android:padding="4dp"
+            android:background="@drawable/rounded_button_green"
+            android:layout_marginRight="20dp"
+/>
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/button_decline_call"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+             android:background="@drawable/rounded_button"
+            android:text="Colgar"
+            android:padding="4dp"
+        />
+    </LinearLayout>
+
+</RelativeLayout>
+

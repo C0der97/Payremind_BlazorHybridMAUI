@@ -42,6 +42,7 @@
         </ContentPage>-->
 
         <mauiPages:DialPage></mauiPages:DialPage>
+        <mauiPages:Guided></mauiPages:Guided>
 
     </TabbedPage.Children>
 </TabbedPage>

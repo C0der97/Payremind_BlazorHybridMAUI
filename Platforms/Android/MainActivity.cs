@@ -14,12 +14,27 @@ namespace PayRemind
 {
     [Activity(Theme = "@style/Maui.SplashTheme", 
         MainLauncher = true,
-        LaunchMode = LaunchMode.SingleTop,
+        Exported = true,
+        LaunchMode = LaunchMode.SingleTask,
         ConfigurationChanges = ConfigChanges.ScreenSize | 
         ConfigChanges.Orientation | ConfigChanges.UiMode | 
         ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | 
         ConfigChanges.Density)]
-    [IntentFilter(new[] { Intent.ActionCall }, Categories = new[] { Intent.CategoryDefault }, DataScheme = "tel")]
+
+
+    [IntentFilter(
+        [Intent.ActionDial],
+        Categories = [Intent.CategoryDefault],
+        DataScheme = "tel")]
+
+    [IntentFilter(
+        [Intent.ActionDial],
+        Categories = [Intent.CategoryDefault])]
+
+    [IntentFilter(
+        [Intent.ActionView, Intent.ActionDial],
+        Categories = [Intent.CategoryDefault, Intent.CategoryBrowsable, ],
+        DataScheme = "tel")]
     public class MainActivity : MauiAppCompatActivity
     {
         public static MainActivity? ActivityCurrent { get; set; }

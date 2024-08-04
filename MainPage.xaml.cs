@@ -67,7 +67,6 @@ namespace PayRemind
                 }
 
                 await Permissions.RequestAsync<Permissions.Phone>();
-                await Permissions.RequestAsync<Permissions.Sms>();
                 await Permissions.RequestAsync<Permissions.ContactsRead>();
                 await Permissions.RequestAsync<Permissions.Reminders>();
                 await Permissions.RequestAsync<Permissions.Speech>();

@@ -83,9 +83,11 @@ namespace PayRemind.Platforms.Android
                 .SetPriority(NotificationCompat.PriorityHigh)
                 .SetOngoing(true);
 
-            var notification = notificationBuilder.Build();
+            Notification notification = notificationBuilder.Build();
 
-            StartForeground(1, notification, ForegroundService.TypePhoneCall);
+            notificationManager.Notify(10203, notification);
+
+            //StartForeground(1, notification, ForegroundService.TypePhoneCall);
         }
 
         private void CancelNotification()

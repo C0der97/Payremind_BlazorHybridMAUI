@@ -1,114 +1,39 @@
 namespace PayRemind.Pages;
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Layouts;
-using System.Collections.Generic;
+using PayRemind.Pages.Custom;
 
 public partial class Guided : ContentPage
 {
 
 
-    private List<View> steps;
-    private int currentStep = 0;
-    private Frame tooltipFrame;
 
 
     public Guided()
 	{
-		InitializeComponent();
+        InitializeComponent();
+        SetupTooltip();
     }
 
 
+    private TooltipCustom tooltip;
 
-    private void SetupGuide()
+
+    private void SetupTooltip()
     {
-
-        ToolTipProperties.SetText(button1, "Click to Save your data");
-
-
-        steps = new List<View>
-            {
-                button1,
-                entry1,
-                label1
-                // Add more controls as needed
-            };
-
-        tooltipFrame = new Frame
-        {
-            BackgroundColor = Colors.Black,
-            Opacity = 0.8,
-            Padding = new Thickness(10),
-            HasShadow = true,
-            IsVisible = false
-        };
-
-        var tooltipLabel = new Label
-        {
-            TextColor = Colors.White,
-            FontSize = 16
-        };
-
-        var nextButton = new Button
-        {
-            Text = "Next",
-            BackgroundColor = Colors.White,
-            TextColor = Colors.Black
-        };
-        nextButton.Clicked += OnNextClicked;
-
-        var tooltipStack = new StackLayout
-        {
-            Children = { tooltipLabel, nextButton }
-        };
-
-        tooltipFrame.Content = tooltipStack;
-
-        // Asegurarse de que tooltipFrame no se añade más de una vez
-        if (!absoluteLayout.Children.Contains(tooltipFrame))
-        {
-            AbsoluteLayout.SetLayoutFlags(tooltipFrame, AbsoluteLayoutFlags.PositionProportional);
-            absoluteLayout.Children.Add(tooltipFrame);
-        }
-
-        StartGuide();
+        tooltip = new TooltipCustom();
+        absoluteLayout.Children.Add(tooltip);
     }
 
-    private void StartGuide()
+    private void OnShowTooltipClicked(object sender, EventArgs e)
     {
-        ShowTooltip(0, "This is the first step of the guide.");
+        tooltip.ShowTooltip((View)sender, "This is a tooltip!");
     }
 
-    private void ShowTooltip(int stepIndex, string message)
+    private void OnHideTooltipClicked(object sender, EventArgs e)
     {
-        if (stepIndex >= steps.Count) return;
-
-        var targetElement = steps[stepIndex];
-        var targetBounds = targetElement.Bounds;
-
-        tooltipFrame.IsVisible = true;
-
-        AbsoluteLayout.SetLayoutBounds(tooltipFrame, new Rect(
-            targetBounds.Left,
-            targetBounds.Bottom,
-            AbsoluteLayout.AutoSize,
-            AbsoluteLayout.AutoSize));
-
-        ((Label)((StackLayout)tooltipFrame.Content).Children[0]).Text = message;
+        tooltip.HideTooltip();
     }
 
-    private void OnNextClicked(object sender, EventArgs e)
-    {
-        currentStep++;
-        if (currentStep < steps.Count)
-        {
-            ShowTooltip(currentStep, $"This is step {currentStep + 1} of the guide.");
-        }
-        else
-        {
-            tooltipFrame.IsVisible = false;
-            DisplayAlert("Tour Complete", "You've completed the guide!", "OK");
-        }
-    }
 
     //protected override void OnAppearing()
     //{
@@ -124,6 +49,5 @@ public partial class Guided : ContentPage
     {
         DisplayAlert("Guide Started", "The guide would start here.", "OK");
 
-        SetupGuide();
     }
 }

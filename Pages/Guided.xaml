@@ -5,30 +5,16 @@
              Title="Guided"
               BackgroundColor="Transparent">
     <AbsoluteLayout x:Name="absoluteLayout">
-        <VerticalStackLayout 
-            Spacing="25" 
-            Padding="30,0" 
-            VerticalOptions="Center">
-
-            <Label 
-                x:Name="label1"
-                Text="Welcome to .NET MAUI!"
-                SemanticProperties.HeadingLevel="Level1"
-                FontSize="32"
-                HorizontalOptions="Center" />
+            <Button 
+                   AbsoluteLayout.LayoutBounds="0.1, 0.1, 0.3, 0.1" 
+            AbsoluteLayout.LayoutFlags="All"
+                Text="Show Tooltip"
+                Clicked="OnShowTooltipClicked" />
 
             <Button 
-                x:Name="button1"
-                Text="Start Guide"
-                SemanticProperties.Hint="Starts the tooltip guide"
-                Clicked="OnStartGuideClicked"
-                HorizontalOptions="Center" />
-
-            <Entry
-                x:Name="entry1"
-                Placeholder="Enter some text"
-                HorizontalOptions="Center" />
-
-        </VerticalStackLayout>
+                           AbsoluteLayout.LayoutBounds="0.5, 0.5, 0.4, 0.1"
+           AbsoluteLayout.LayoutFlags="All"
+                Text="Hide Tooltip"
+                Clicked="OnHideTooltipClicked" />
     </AbsoluteLayout>
 </ContentPage>

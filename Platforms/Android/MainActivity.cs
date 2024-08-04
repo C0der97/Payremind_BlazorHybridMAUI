@@ -19,9 +19,7 @@ namespace PayRemind
         ConfigChanges.Orientation | ConfigChanges.UiMode | 
         ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | 
         ConfigChanges.Density)]
-    [IntentFilter([Intent.ActionDial], Categories = [Intent.CategoryDefault])]
-    [IntentFilter([Intent.ActionView], Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable })]
-
+    [IntentFilter(new[] { Intent.ActionCall }, Categories = new[] { Intent.CategoryDefault }, DataScheme = "tel")]
     public class MainActivity : MauiAppCompatActivity
     {
         public static MainActivity? ActivityCurrent { get; set; }

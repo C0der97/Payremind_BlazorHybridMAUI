@@ -4,6 +4,7 @@
              xmlns:local="clr-namespace:PayRemind"
              xmlns:pages="clr-namespace:PayRemind.Components.Pages"
              x:Class="PayRemind.MainPage"
+            xmlns:mauiPages="clr-namespace:PayRemind.Pages"
              xmlns:android="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;assembly=Microsoft.Maui.Controls"
              android:TabbedPage.ToolbarPlacement="Bottom"
              android:TabbedPage.IsSwipePagingEnabled="False"
@@ -39,6 +40,8 @@
         <!--<ContentPage Title="Llamadas" IconImageSource="ringphone.png"  >
         
         </ContentPage>-->
+
+        <mauiPages:DialPage></mauiPages:DialPage>
 
     </TabbedPage.Children>
 </TabbedPage>

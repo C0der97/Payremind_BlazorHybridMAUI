@@ -4,87 +4,106 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Telecom;
 using AndroidX.Core.App;
+using AndroidX.Core.Content;
 
 namespace PayRemind.Platforms.Android
 {
-    [Service(ForegroundServiceType = global::Android.Content.PM.ForegroundService.TypePhoneCall,
-        Enabled = true,
-        Exported = true,
-        Permission = "android.permission.BIND_INCALL_SERVICE")]
+    [Service(Enabled = true, Exported = true,
+        Permission = "android.permission.BIND_INCALL_SERVICE"
+        )]
+    [IntentFilter(["android.telecom.InCallService"])]
+    [MetaData(
+        "android.telecom.IN_CALL_SERVICE_UI",
+        Value = "true"
+    )]
     public class CallService : InCallService
     {
-        public override IBinder OnBind(Intent intent)
+        private readonly Call.Callback _callCallback = new CallCallback();
+
+        public override void OnCallAdded(Call call)
         {
-            return null;
+            base.OnCallAdded(call);
+            call.RegisterCallback(_callCallback);
+
+            // Check the screen state and whether to show the notification
+            bool isScreenLocked = ((KeyguardManager)GetSystemService(Context.KeyguardService)).IsKeyguardLocked;
+            bool isDeviceInteractive = ((PowerManager)GetSystemService(Context.PowerService)).IsInteractive;
+
+            if (!isDeviceInteractive || isScreenLocked)
+            {
+                ShowNotification(call);
+                StartActivity(new Intent(this, typeof(MainActivity)));
+            }
+            else
+            {
+                ShowNotification(call);
+            }
         }
 
-        public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
+        public override void OnCallRemoved(Call call)
         {
-            Intent notificationIntent = new(this, typeof(MainActivity));
+            base.OnCallRemoved(call);
+            call.UnregisterCallback(_callCallback);
+            CancelNotification();
+        }
 
-            PendingIntent? pendingIntent = PendingIntent.GetActivity(this, 0, notificationIntent, PendingIntentFlags.Immutable);
+        private void ShowNotification(Call call)
+        {
+            var notificationManager = (NotificationManager)GetSystemService(Context.NotificationService);
 
-            SentrySdk.CaptureMessage("Creando servicio");
+            string channelId = "phone_call_channel";
+            string channelName = "Phone Call Notifications";
 
-
-            Java.Lang.Object? serviceData = GetSystemService(Context.NotificationService);
-
-            if (serviceData != null)
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
             {
-                NotificationManager manager = (NotificationManager)serviceData;
-
-
-                Intent intentAnswer = new(this, typeof(PhoneCallReceiver));
-
-                intentAnswer.SetAction("ANSWER");
-
-                PendingIntent? pendingIntentAnswer = PendingIntent.GetBroadcast(this, 0, intentAnswer,
-                    PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
-
-                Intent intentHangup = new(this, typeof(PhoneCallReceiver));
-
-                intentHangup.SetAction("HANGUP");
-
-                PendingIntent? pendingIntentHangup = PendingIntent.GetBroadcast(this, 1, intentHangup,
-                                                    PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable
-                                                    );
-
-                string channelId = "phone_call_channel";
-                
-                string channelName = "Phone Call Notifications";
-
-                NotificationChannel channel = new(channelId,channelName,NotificationImportance.High)
+                var channel = new NotificationChannel(channelId, channelName, NotificationImportance.High)
                 {
                     LockscreenVisibility = NotificationVisibility.Private
                 };
-
-                manager.CreateNotificationChannel(channel);
-
-
-
-                NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId)
-               .SetContentTitle("Llamada entrante")
-               .SetContentText("Tiene una llamada entrante my soc")
-               .SetSmallIcon(CommunityToolkit.Maui.Resource.Drawable.ic_call_answer_low)
-               .AddAction(CommunityToolkit.Maui.Resource.Drawable.ic_call_answer, "Answer", pendingIntentAnswer)
-               .AddAction(CommunityToolkit.Maui.Resource.Drawable.ic_call_decline, "Hang Up", pendingIntentHangup)
-               .SetPriority(NotificationCompat.PriorityHigh)
-               .SetOngoing(true);
-
-                Notification notification = notificationBuilder.Build();
-
-
-                //manager.Notify(1022, notification);
-
-                StartForeground(
-                    1,
-                    notification,
-                    ForegroundService.TypePhoneCall);
-
+                notificationManager.CreateNotificationChannel(channel);
             }
 
+            var notificationIntent = new Intent(this, typeof(MainActivity));
+            var pendingIntent = PendingIntent.GetActivity(this, 0, notificationIntent, PendingIntentFlags.Immutable);
 
-            return StartCommandResult.Sticky;
+            var intentAnswer = new Intent(this, typeof(PhoneCallReceiver));
+            intentAnswer.SetAction("ANSWER");
+            var pendingIntentAnswer = PendingIntent.GetBroadcast(this, 0, intentAnswer, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
+
+            var intentHangup = new Intent(this, typeof(PhoneCallReceiver));
+            intentHangup.SetAction("HANGUP");
+            var pendingIntentHangup = PendingIntent.GetBroadcast(this, 1, intentHangup, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
+
+            var notificationBuilder = new NotificationCompat.Builder(this, channelId)
+                .SetContentTitle("Llamada entrante")
+                .SetContentText("Tiene una llamada entrante.")
+                .SetSmallIcon(Resource.Drawable.ic_call_answer_low) // Ensure you have this drawable
+                .AddAction(Resource.Drawable.ic_call_answer, "Answer", pendingIntentAnswer)
+                .AddAction(Resource.Drawable.ic_call_decline, "Hang Up", pendingIntentHangup)
+                .SetPriority(NotificationCompat.PriorityHigh)
+                .SetOngoing(true);
+
+            var notification = notificationBuilder.Build();
+
+            StartForeground(1, notification, ForegroundService.TypePhoneCall);
+        }
+
+        private void CancelNotification()
+        {
+            var notificationManager = (NotificationManager)GetSystemService(Context.NotificationService);
+            notificationManager.Cancel(1);
+        }
+
+        private class CallCallback : Call.Callback
+        {
+            public override void OnStateChanged(Call call, CallState state)
+            {
+                base.OnStateChanged(call, state);
+                if (state == CallState.Disconnected || state == CallState.Disconnecting)
+                {
+                    // Handle call disconnected or disconnecting
+                }
+            }
         }
     }
 }

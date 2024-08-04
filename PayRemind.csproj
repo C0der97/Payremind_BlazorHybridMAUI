@@ -40,11 +40,15 @@
 
     <PropertyGroup>
       <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
+      <AndroidSigningKeyStore>Payremind.keystore</AndroidSigningKeyStore>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
       <ApplicationTitle>PayRemindRMK</ApplicationTitle>
-      <AndroidKeyStore>False</AndroidKeyStore>
+      <AndroidKeyStore>True</AndroidKeyStore>
+      <AndroidSigningStorePass>Payremind</AndroidSigningStorePass>
+      <AndroidSigningKeyAlias>payremind</AndroidSigningKeyAlias>
+      <AndroidSigningKeyPass>Payremind</AndroidSigningKeyPass>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-maccatalyst|AnyCPU'">
@@ -61,7 +65,10 @@
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
       <ApplicationTitle>PayRemindRMK</ApplicationTitle>
-      <AndroidKeyStore>False</AndroidKeyStore>
+      <AndroidKeyStore>True</AndroidKeyStore>
+      <AndroidSigningStorePass>Payremind</AndroidSigningStorePass>
+      <AndroidSigningKeyAlias>payremind</AndroidSigningKeyAlias>
+      <AndroidSigningKeyPass>Payremind</AndroidSigningKeyPass>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-maccatalyst|AnyCPU'">
@@ -131,6 +138,12 @@
 
     <ItemGroup>
       <MauiIcon Include="Resources\AppIcon\icon.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <MauiXaml Update="Pages\DialPage.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </MauiXaml>
     </ItemGroup>
 
 </Project>

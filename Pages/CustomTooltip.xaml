@@ -7,7 +7,7 @@
            HasShadow="True"
            CornerRadius="8"
            BorderColor="LightGray">
-        <VerticalStackLayout  BackgroundColor="Wheat">
+        <VerticalStackLayout  BackgroundColor="Transparent">
 
             <GraphicsView  x:Name="ArrowGraphicsView"
                           VerticalOptions="Start"
@@ -15,7 +15,7 @@
                           WidthRequest="30"
                           HeightRequest="20"/>
 
-            <StackLayout Margin="10">
+            <StackLayout Margin="10" Background="Transparent">
                 <Label x:Name="TooltipTitle" 
                        TextColor="Black" 
                        FontSize="16"

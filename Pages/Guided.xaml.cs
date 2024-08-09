@@ -50,7 +50,7 @@ public partial class Guided : ContentPage
             {
                 if (!MyButton.IsVisible) return;
 
-                _myTooltip.ShowAt(MyButton, offsetY: 10, offsetX: 0);
+                //_myTooltip.ShowAt(MyButton, offsetY: 10, offsetX: 0);
             });
 
             // Desuscribirse del evento si no es necesario más

@@ -48,23 +48,55 @@ public partial class CustomTooltip : ContentView
             return;
         }
 
+        // Asegúrate de que el layout es un AbsoluteLayout
+        AbsoluteLayout absoluteLayout;
+        if (layout is not AbsoluteLayout)
+        {
+            absoluteLayout = new AbsoluteLayout();
+            layout.Children.Clear();
+            layout.Children.Add(absoluteLayout);
+        }
+        else
+        {
+            absoluteLayout = (AbsoluteLayout)layout;
+        }
 
+        double targetX = targetView.X + offsetX;
+        double targetY = targetView.Y + targetView.Height + offsetY;
 
-        double targetX = targetView.X;
-        double targetY = targetView.Y + targetView.Height;
-
-        this.TranslationX = (targetX / 2 ) - 40;
-        this.TranslationY = targetY + offsetY;
+        AbsoluteLayout.SetLayoutBounds(this, new Rect(targetX + offsetX, targetY + offsetY, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
+        AbsoluteLayout.SetLayoutFlags(this, AbsoluteLayoutFlags.None);
 
         this.Opacity = 0;
         this.IsVisible = true;
 
-        await this.FadeTo(1, 250); // Desvanece en 250 milisegundos
-
-        if (!layout.Children.Contains(this))
+        if (!absoluteLayout.Children.Contains(this))
         {
-            layout.Children.Add(this);
+            absoluteLayout.Children.Add(this);
         }
+
+        await Task.Delay(10);
+
+        AdjustPosition();
+
+        await this.FadeTo(1, 250);
+    }
+
+    private void OnSizeChanged(object sender, EventArgs e)
+    {
+        // Este método se llamará cada vez que el tamaño del tooltip cambie
+        AdjustPosition();
+    }
+
+    private void AdjustPosition()
+    {
+        // Ajusta la posición vertical del tooltip
+        // Asumiendo que quieres que aparezca encima del elemento objetivo
+        //this.TranslationY -= this.Height + 40;
+
+        // Si quieres ajustar también la posición horizontal, puedes hacerlo aquí
+        // Por ejemplo, para centrar el tooltip:
+        // this.TranslationX = (targetView.Width - this.Width) / 2;
     }
 
 

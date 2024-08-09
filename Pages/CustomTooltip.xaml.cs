@@ -1,4 +1,6 @@
 using Microsoft.Maui.Layouts;
+using PayRemind.Pages.Custom;
+using SkiaSharp.Views.Maui;
 
 namespace PayRemind.Pages;
 
@@ -27,38 +29,50 @@ public partial class CustomTooltip : ContentView
         InitializeComponent();
         TooltipTitle.SetBinding(Label.TextProperty, new Binding(nameof(Title), source: this));
         TooltipText.SetBinding(Label.TextProperty, new Binding(nameof(Text), source: this));
+
+        var tapGestureRecognizer = new TapGestureRecognizer();
+    tapGestureRecognizer.Tapped += (s, e) => 
+    {
+        this.IsVisible = false;
+    };
+    this.GestureRecognizers.Add(tapGestureRecognizer);
+
+        DrawArrow();
+
     }
 
-    public void ShowAt(View targetView, double offsetX = 0, double offsetY = 0)
+    public async void ShowAt(View targetView, double offsetX = 0, double offsetY = 0)
     {
         if (targetView.Parent is not Layout layout)
         {
             return;
         }
 
-        // Asegúrate de que el tooltip no está ya en el layout
+
+
+        double targetX = targetView.X;
+        double targetY = targetView.Y + targetView.Height;
+
+        this.TranslationX = (targetX / 2 ) - 40;
+        this.TranslationY = targetY + offsetY;
+
+        this.Opacity = 0;
+        this.IsVisible = true;
+
+        await this.FadeTo(1, 250); // Desvanece en 250 milisegundos
+
         if (!layout.Children.Contains(this))
         {
-            layout.Add(this);
+            layout.Children.Add(this);
         }
-
-        // Posiciona el tooltip
-        this.TranslationX = targetView.X + offsetX;
-        this.TranslationY = targetView.Y + targetView.Height + offsetY;
-
-        // Ajusta la posición si el tooltip se sale de los límites
-        this.SizeChanged += (s, e) =>
-        {
-            if (this.TranslationX + this.Width > layout.Width)
-            {
-                this.TranslationX = layout.Width - this.Width;
-            }
-            if (this.TranslationY + this.Height > layout.Height)
-            {
-                this.TranslationY = targetView.Y - this.Height - offsetY;
-            }
-        };
-
-        this.IsVisible = true;
     }
+
+
+
+    private void DrawArrow()
+    {
+        ArrowGraphicsView.Drawable = new ArrowDrawable();
+    }
+
+
 }

@@ -2,19 +2,29 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PayRemind.Pages.CustomTooltip">
-    <Frame BackgroundColor="White"
-           Padding="10"
+    <Frame BackgroundColor="Transparent"
+           Padding="5"
            HasShadow="True"
            CornerRadius="8"
            BorderColor="LightGray">
-        <StackLayout>
-            <Label x:Name="TooltipTitle" 
-                   TextColor="Black" 
-                   FontSize="16"
-                   FontAttributes="Bold"/>
-            <Label x:Name="TooltipText" 
-                   TextColor="Gray" 
-                   FontSize="14"/>
-        </StackLayout>
+        <VerticalStackLayout  BackgroundColor="Wheat">
+
+            <GraphicsView  x:Name="ArrowGraphicsView"
+                          VerticalOptions="Start"
+                          HorizontalOptions="Center"
+                          WidthRequest="30"
+                          HeightRequest="20"/>
+
+            <StackLayout Margin="10">
+                <Label x:Name="TooltipTitle" 
+                       TextColor="Black" 
+                       FontSize="16"
+                       FontAttributes="Bold"/>
+                <Label x:Name="TooltipText" 
+                       TextColor="Gray" 
+                       FontSize="14"/>
+            </StackLayout>
+
+        </VerticalStackLayout>
     </Frame>
 </ContentView>

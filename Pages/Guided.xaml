@@ -5,12 +5,15 @@
              Title="Guided"
              xmlns:local="clr-namespace:PayRemind.Pages"
               BackgroundColor="Transparent">
-    <Grid x:Name="MainGrid">
-        <Button x:Name="MyButton" 
+
+    <ScrollView>
+        <Grid x:Name="MainGrid">
+            <Button x:Name="MyButton" 
                 Text="Tap to See Menu Options" 
                 VerticalOptions="Center"
                 HorizontalOptions="Center"/>
 
-        <!-- El tooltip se agregará dinámicamente en código -->
-    </Grid>
+        </Grid>
+    </ScrollView>
+
 </ContentPage>

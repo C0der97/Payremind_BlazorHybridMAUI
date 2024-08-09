@@ -1,6 +1,5 @@
 namespace PayRemind.Pages;
 using Microsoft.Maui.Controls;
-using PayRemind.Pages.Custom;
 
 public partial class Guided : ContentPage
 {
@@ -15,7 +14,7 @@ public partial class Guided : ContentPage
         {
             Title = "Tap to See Menu Options",
             Text = "This button opens the menu",
-            IsVisible = false
+            IsVisible = false,
         };
 
         MyButton.Clicked += ToggleTooltip;
@@ -31,6 +30,31 @@ public partial class Guided : ContentPage
         else
         {
             _myTooltip.ShowAt(MyButton, offsetY: 10);
+        }
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        // Mostrar el tooltip automáticamente cuando la página aparezca
+        //_myTooltip.ShowAt(MyButton, offsetY: 10);
+
+        MyButton.SizeChanged += OnButtonSizeChanged;
+    }
+
+    private void OnButtonSizeChanged(object sender, EventArgs e)
+    {
+        if (MyButton.Width > 0 && MyButton.Height > 0)
+        {
+            Dispatcher.Dispatch(() =>
+            {
+                if (!MyButton.IsVisible) return;
+
+                _myTooltip.ShowAt(MyButton, offsetY: 10, offsetX: 0);
+            });
+
+            // Desuscribirse del evento si no es necesario más
+            MyButton.SizeChanged -= OnButtonSizeChanged;
         }
     }
 

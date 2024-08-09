@@ -145,6 +145,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <MauiXaml Update="Pages\CustomTooltip.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </MauiXaml>
       <MauiXaml Update="Pages\DialPage.xaml">
         <Generator>MSBuild:Compile</Generator>
       </MauiXaml>

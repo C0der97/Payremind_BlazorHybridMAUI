@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PayRemind.Pages.CustomTooltip">
+    <Frame BackgroundColor="White"
+           Padding="10"
+           HasShadow="True"
+           CornerRadius="8"
+           BorderColor="LightGray">
+        <StackLayout>
+            <Label x:Name="TooltipTitle" 
+                   TextColor="Black" 
+                   FontSize="16"
+                   FontAttributes="Bold"/>
+            <Label x:Name="TooltipText" 
+                   TextColor="Gray" 
+                   FontSize="14"/>
+        </StackLayout>
+    </Frame>
+</ContentView>

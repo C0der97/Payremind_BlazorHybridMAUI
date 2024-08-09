@@ -5,49 +5,33 @@ using PayRemind.Pages.Custom;
 public partial class Guided : ContentPage
 {
 
-
+    private CustomTooltip _myTooltip;
 
 
     public Guided()
 	{
         InitializeComponent();
-        SetupTooltip();
+        _myTooltip = new CustomTooltip
+        {
+            Title = "Tap to See Menu Options",
+            Text = "This button opens the menu",
+            IsVisible = false
+        };
+
+        MyButton.Clicked += ToggleTooltip;
     }
 
 
-    private TooltipCustom tooltip;
-
-
-    private void SetupTooltip()
+    private void ToggleTooltip(object sender, EventArgs e)
     {
-        tooltip = new TooltipCustom();
-        absoluteLayout.Children.Add(tooltip);
+        if (_myTooltip.IsVisible)
+        {
+            _myTooltip.IsVisible = false;
+        }
+        else
+        {
+            _myTooltip.ShowAt(MyButton, offsetY: 10);
+        }
     }
 
-    private void OnShowTooltipClicked(object sender, EventArgs e)
-    {
-        tooltip.ShowTooltip((View)sender, "This is a tooltip!");
-    }
-
-    private void OnHideTooltipClicked(object sender, EventArgs e)
-    {
-        tooltip.HideTooltip();
-    }
-
-
-    //protected override void OnAppearing()
-    //{
-    //    base.OnAppearing();
-    //    this.Loaded += (s, e) =>
-    //    {
-    //        // Espera un momento para asegurar que la UI está completamente cargada
-    //        Dispatcher.Dispatch(() => SetupGuide());
-    //    };
-    //}
-
-    private void OnStartGuideClicked(object sender, EventArgs e)
-    {
-        DisplayAlert("Guide Started", "The guide would start here.", "OK");
-
-    }
 }

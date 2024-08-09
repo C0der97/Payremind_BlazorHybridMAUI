@@ -13,7 +13,7 @@
 
         public TooltipCustom()
         {
-            BackgroundColor = Colors.Black;
+            BackgroundColor = Colors.Transparent;
             Padding = new Thickness(10);
             IsVisible = false;
 
@@ -28,10 +28,11 @@
                     {
                         TextColor = Colors.White,
                         FontSize = 14,
-                        HorizontalOptions = LayoutOptions.Center,
+                        HorizontalOptions = LayoutOptions.Start,
                         VerticalOptions = LayoutOptions.Center
                     }
-                }
+                },
+                HorizontalOptions = LayoutOptions.Start,
             };
 
             ((Label)tooltipContent.Children[0]).SetBinding(Label.TextProperty, new Binding(nameof(TooltipText), source: this));
@@ -39,15 +40,15 @@
             // Create tooltip arrow
             var arrow = new BoxView
             {
-                Color = Colors.Black,
-                WidthRequest = 20,
+                Color = Colors.Red,
+                WidthRequest = 10,
                 HeightRequest = 10,
                 Rotation = 45
             };
 
             // Arrange the layout
-            Children.Add(tooltipContent);
             Children.Add(arrow);
+            Children.Add(tooltipContent);
         }
         public void ShowTooltip(View targetView, string text)
         {
@@ -65,11 +66,11 @@
             // Calculate tooltip position
             var tooltipPosition = new Point(
                 targetBounds.Left + (targetBounds.Width / 2),
-                targetBounds.Top - HeightRequest);
+                targetBounds.Bottom - HeightRequest);
 
             // Set tooltip layout bounds
             AbsoluteLayout.SetLayoutBounds(this, new Rect(
-                tooltipPosition.X - (WidthRequest / 2),
+                tooltipPosition.X,
                 tooltipPosition.Y,
                 WidthRequest,
                 HeightRequest));

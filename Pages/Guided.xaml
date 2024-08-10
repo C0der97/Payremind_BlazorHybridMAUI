@@ -6,14 +6,11 @@
              xmlns:local="clr-namespace:PayRemind.Pages"
               BackgroundColor="Transparent">
 
-    <ScrollView>
-        <Grid x:Name="MainGrid">
-            <Button x:Name="MyButton" 
+    <VerticalStackLayout x:Name="MainGrid" VerticalOptions="Center">
+            <Button x:Name="MyButton" VerticalOptions="Center"
                 Text="Tap to See Menu Options" 
-                VerticalOptions="Center"
                 HorizontalOptions="Center"/>
 
-        </Grid>
-    </ScrollView>
+        </VerticalStackLayout>
 
 </ContentPage>

@@ -48,56 +48,47 @@ public partial class CustomTooltip : ContentView
             return;
         }
 
-        // Asegúrate de que el layout es un AbsoluteLayout
-        AbsoluteLayout absoluteLayout;
-        if (layout is not AbsoluteLayout)
-        {
-            absoluteLayout = new AbsoluteLayout();
-            layout.Children.Clear();
-            layout.Children.Add(absoluteLayout);
-        }
-        else
-        {
-            absoluteLayout = (AbsoluteLayout)layout;
-        }
-
+        // Calcula la posición del tooltip relativa al targetView
         double targetX = targetView.X + offsetX;
         double targetY = targetView.Y + targetView.Height + offsetY;
 
-        AbsoluteLayout.SetLayoutBounds(this, new Rect(targetX + offsetX, targetY + offsetY, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
-        AbsoluteLayout.SetLayoutFlags(this, AbsoluteLayoutFlags.None);
+        // Ajusta la posición del tooltip
+        this.TranslationX = targetX;
+        this.TranslationY = targetY;
+
+        // Asegúrate de que el tooltip tenga un tamaño
+        this.WidthRequest = -1; // O el ancho que prefieras
+        this.HeightRequest = -1; // Altura automática
 
         this.Opacity = 0;
         this.IsVisible = true;
 
-        if (!absoluteLayout.Children.Contains(this))
+        if (!layout.Children.Contains(this))
         {
-            absoluteLayout.Children.Add(this);
+            layout.Children.Add(this);
         }
 
-        await Task.Delay(10);
-
-        AdjustPosition();
-
+        await Task.Delay(10); // Espera a que se actualice el layout
+        AdjustPosition(targetView);
         await this.FadeTo(1, 250);
+    }
+
+    private void AdjustPosition(View targetView)
+    {
+        // Centra el tooltip horizontalmente con respecto al botón
+        this.TranslationX = targetView.X + (targetView.Width - this.Width) / 2;
+
+        // Asegúrate de que el tooltip esté completamente debajo del botón
+        this.TranslationY = targetView.Y + 10; // Agrega un pequeño espacio
+
     }
 
     private void OnSizeChanged(object sender, EventArgs e)
     {
         // Este método se llamará cada vez que el tamaño del tooltip cambie
-        AdjustPosition();
+        //AdjustPosition();
     }
 
-    private void AdjustPosition()
-    {
-        // Ajusta la posición vertical del tooltip
-        // Asumiendo que quieres que aparezca encima del elemento objetivo
-        //this.TranslationY -= this.Height + 40;
-
-        // Si quieres ajustar también la posición horizontal, puedes hacerlo aquí
-        // Por ejemplo, para centrar el tooltip:
-        // this.TranslationX = (targetView.Width - this.Width) / 2;
-    }
 
 
 

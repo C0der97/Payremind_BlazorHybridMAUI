@@ -6,7 +6,7 @@
            Padding="5"
            HasShadow="True"
            CornerRadius="8"
-           BorderColor="LightGray">
+           BorderColor="Transparent" WidthRequest="240">
         <VerticalStackLayout  BackgroundColor="Transparent">
 
             <GraphicsView  x:Name="ArrowGraphicsView"
@@ -15,15 +15,20 @@
                           WidthRequest="30"
                           HeightRequest="20"/>
 
-            <StackLayout Margin="10" Background="Transparent">
-                <Label x:Name="TooltipTitle" 
+
+            <Frame BorderColor="LightGray" CornerRadius="5" Padding="0">
+
+                <StackLayout Margin="10,0,0,0" Background="Transparent" HorizontalOptions="Center">
+                    <Label x:Name="TooltipTitle" 
                        TextColor="Black" 
                        FontSize="16"
                        FontAttributes="Bold"/>
-                <Label x:Name="TooltipText" 
+                    <Label x:Name="TooltipText" 
                        TextColor="Gray" 
                        FontSize="14"/>
-            </StackLayout>
+                </StackLayout>
+
+            </Frame>
 
         </VerticalStackLayout>
     </Frame>

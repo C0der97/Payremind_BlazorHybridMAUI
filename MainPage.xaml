@@ -15,15 +15,33 @@
 
         <ContentPage Title="Recordatorios" IconImageSource="reloj.png" >
 
-            <ScrollView>
 
-                    <BlazorWebView x:Name="blazorWebViewHome" HostPage="wwwroot/index.html" >
+            <AbsoluteLayout>
+
+
+                    <BlazorWebView x:Name="blazorWebViewHome" HostPage="wwwroot/index.html" 
+                                   AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                        AbsoluteLayout.LayoutFlags="All">
                         <BlazorWebView.RootComponents>
                             <RootComponent Selector="#app"  ComponentType="{x:Type pages:Home}" />
                         </BlazorWebView.RootComponents>
                     </BlazorWebView>
-            </ScrollView>
-    
+
+                    <Button
+            x:Name="FabButton"
+            Text="+"
+            FontSize="24"
+            BackgroundColor="LightGreen"
+            TextColor="White"
+            CornerRadius="30"
+            WidthRequest="60"
+            HeightRequest="60"
+            AbsoluteLayout.LayoutBounds="1, 1, AutoSize, AutoSize"
+            AbsoluteLayout.LayoutFlags="PositionProportional"
+                        Clicked="FabButton_Clicked"
+            />
+                
+            </AbsoluteLayout>
 
         </ContentPage>
 

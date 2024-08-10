@@ -94,6 +94,12 @@
         }
     </script>
 
+    <script>
+        window.callBlazorMethod = (methodName, ...args) => {
+            return DotNet.invokeMethodAsync('PayRemind', methodName, ...args);
+        }
+    </script>
+
 </body>
 
 </html>

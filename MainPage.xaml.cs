@@ -3,7 +3,6 @@ using Microsoft.JSInterop;
 using PayRemind.Data;
 using PayRemind.Messages;
 using Plugin.LocalNotification;
-using System.Collections.Generic;
 
 namespace PayRemind
 {
@@ -12,6 +11,9 @@ namespace PayRemind
         private readonly AppTheme currentTheme = Application.Current == null ? AppTheme.Dark : Application.Current.RequestedTheme;
 
         private DateTime _selectedDateTime;
+
+
+
         public MainPage()
         {
             InitializeComponent();
@@ -76,8 +78,24 @@ namespace PayRemind
                 await Permissions.RequestAsync<Permissions.StorageWrite>();
                 await Permissions.RequestAsync<Permissions.Microphone>();
                 await Permissions.RequestAsync<Permissions.ContactsWrite>();
+                await Permissions.RequestAsync<Permissions.LaunchApp>();
 
             });
+
+
+            WeakReferenceMessenger.Default.Register<HideFloatButton>(this, (s, message) =>
+            {
+                if (message._HideFloatButton)
+                {
+                    FabButton.IsVisible = false;
+                }
+                else
+                {
+                    FabButton.IsVisible = true;
+                }
+
+            });
+
 
             //MainThread.BeginInvokeOnMainThread(() =>
             //{
@@ -130,6 +148,11 @@ namespace PayRemind
         protected override void OnAppearing()
         {
             base.OnAppearing();
+        }
+
+        private void FabButton_Clicked(object sender, EventArgs e)
+        {
+            WeakReferenceMessenger.Default.Send(new OpenDialog(true));
         }
     }
 }

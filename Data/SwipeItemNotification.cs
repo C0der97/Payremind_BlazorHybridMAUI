@@ -10,5 +10,6 @@ namespace PayRemind.Data
         public double StartX { get; set; }
         public bool IsPaid { get; set; }
         public string DateNotification { get; set; } = string.Empty;
+        public decimal Mount { get; set; } = 0;
     }
 }

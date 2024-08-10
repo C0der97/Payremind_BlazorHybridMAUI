@@ -21,7 +21,7 @@
 
 <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" />
 <MudPopoverProvider />
-<MudDialogProvider Position="DialogPosition.TopCenter" />
+<MudDialogProvider Position="DialogPosition.Center" BackdropClick="false" />
 <MudSnackbarProvider />
 
 <style>
@@ -60,6 +60,9 @@
                 <MudText Typo="Typo.body2">
                     Estado: <strong>@(item.IsPaid ? "Pagado" : "Sin Pagar")</strong>
                 </MudText>
+                <MudText Typo="Typo.body2">
+                    Valor: <strong>@item.Mount</strong>
+                </MudText>
             </MudCardContent>
             @if (!item.IsPaid)
             {
@@ -82,14 +85,14 @@
     </MudPaper>
 }
 
-
+@* 
 <MudIconButton Icon="@Icons.Material.Filled.Add" 
 Variant="Variant.Filled"
                OnClick="OpenDialogAsync"
                Size="Size.Large"
                Style=@($"position: fixed;right: 20px; bottom: 20px; z-index: 100%;border-radius:50%;background-color:#3dc4a4;color:white")></MudIconButton>
 
-
+ *@
 
 @code {
 
@@ -138,6 +141,15 @@ Variant="Variant.Filled"
             _isDarkMode = true;
         }
 
+        WeakReferenceMessenger.Default.Register<OpenDialog>(this, (s,message) =>
+        {
+            if (message._OpenDialog)
+            {
+                OpenDialogAsync();
+            }
+            
+        });
+
 
 
 
@@ -163,7 +175,8 @@ Variant="Variant.Filled"
                     Id = not.Id,
                     Title = not.Name,
                     IsPaid = not.IsPaid,
-                    DateNotification = not.DateTime.ToString("yyyy-MM-dd hh:mm tt")
+                    DateNotification = not.DateTime.ToString("yyyy-MM-dd hh:mm tt"),
+                    Mount = not.Amount
                 });
         }
     }
@@ -320,6 +333,8 @@ Variant="Variant.Filled"
 
     private Task OpenDialogAsync()
     {
+
+        WeakReferenceMessenger.Default.Send(new HideFloatButton(true));
         return DialogService.ShowAsync<DialogSetOptionsExample_Dialog>("Nuevo Recordatorio");
     }
 
@@ -338,6 +353,12 @@ Variant="Variant.Filled"
     public void Dispose()
     {
         StateService.OnChange -= StateHasChangedData;
+    }
+
+    [JSInvokable]
+    public static Task<string> MiFuncionBlazor(string param)
+    {
+        return Task.FromResult($"Resultado: {param}");
     }
 
 }

@@ -1,4 +1,6 @@
-﻿@using Plugin.LocalNotification
+﻿@using CommunityToolkit.Mvvm.Messaging
+@using PayRemind.Messages
+@using Plugin.LocalNotification
 @using PayRemind.Shared
 @using Microsoft.Maui.Controls
 
@@ -80,7 +82,10 @@
     public DateOnly datePart { get; set; }
     public TimeSpan? timePart { get; set; }
 
-    private void Close() => MudDialog.Close(DialogResult.Ok(true));
+    private void Close() {
+        WeakReferenceMessenger.Default.Send(new HideFloatButton(false));
+        MudDialog.Close(DialogResult.Ok(true));
+    }
 
     private async Task HandleValidSubmit()
     {

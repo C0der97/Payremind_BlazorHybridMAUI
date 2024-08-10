@@ -30,6 +30,8 @@
                 <MudCardContent>
                     <MudText Typo="Typo.h5">@item.Name</MudText>
                     <MudText Typo="Typo.body2">@item.DateTime</MudText>
+                    <MudText Typo="Typo.body2">Valor: <strong>@item.Amount</strong></MudText>
+
                     @if (item.IsPaid)
                     {
                         <MudText Typo="Typo.body2">Estado: <strong>Pagado</strong></MudText>

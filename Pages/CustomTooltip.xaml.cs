@@ -1,6 +1,4 @@
-using Microsoft.Maui.Layouts;
 using PayRemind.Pages.Custom;
-using SkiaSharp.Views.Maui;
 
 namespace PayRemind.Pages;
 

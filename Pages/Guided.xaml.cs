@@ -60,7 +60,7 @@ public partial class Guided : ContentPage
 
             if (nativeView != null)
                 {
-                    ShowCaseViewWrapper.ShowGuideView(nativeView, nativeView2, "Welcome!", "This is a sample button. Tap it to perform an action.");
+                    ShowCaseViewWrapper.ShowGuideView(nativeView, nativeView2, "Welcome!", "This is a sample button. Tap it to perform an action.", "Guia 2", "Btn 2");
                 }
 
             }

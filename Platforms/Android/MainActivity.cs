@@ -9,6 +9,8 @@ using Android.Widget;
 using CommunityToolkit.Mvvm.Messaging;
 using PayRemind.Messages;
 using PayRemind.Pages;
+using PayRemind.Platforms.Android.Wrappers;
+using PayRemind.Wrappers;
 
 namespace PayRemind
 {

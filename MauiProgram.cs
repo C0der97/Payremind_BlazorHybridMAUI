@@ -21,7 +21,8 @@ namespace PayRemind
             string dbPath = Path.Combine(FileSystem.AppDataDirectory, "notifications.db");
 
             var builder = MauiApp.CreateBuilder();
-            builder.UseMauiApp<App>().ConfigureNullableDateTimePicker().
+            builder.UseMauiApp<App>()
+                .ConfigureNullableDateTimePicker().
                 UseLocalNotification().ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -73,6 +74,9 @@ namespace PayRemind
 #if ANDROID
             builder.Services.AddSingleton<PhoneCallReceiver>();
             builder.Services.AddSingleton<ICallHandler, CallHandlingService>();
+            builder.Services.AddSingleton<IViewConverterService, ViewConverterService>();
+
+            DependencyService.Register<IViewConverterService, ViewConverterService>();
 #endif
 
             builder.Services.AddSingleton(new SQLiteDatabaseService(dbPath));

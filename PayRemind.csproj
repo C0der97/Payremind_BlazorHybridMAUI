@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <TargetFrameworks>net8.0-android;net8.0-maccatalyst;net8.0-ios</TargetFrameworks>
+        <TargetFrameworks>net8.0-android;</TargetFrameworks>
         <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
         <!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
 
@@ -39,7 +39,6 @@
     </PropertyGroup>
 
     <PropertyGroup>
-      <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
       <AndroidSigningKeyStore>Payremind.keystore</AndroidSigningKeyStore>
     </PropertyGroup>
 
@@ -145,6 +144,10 @@
 
     <ItemGroup>
       <MauiIcon Include="Resources\AppIcon\icon.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ShowCaseBinding\ShowCaseBinding.csproj" />
     </ItemGroup>
 
     <ItemGroup>

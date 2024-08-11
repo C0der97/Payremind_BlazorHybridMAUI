@@ -9,8 +9,17 @@
     <VerticalStackLayout x:Name="MainGrid" VerticalOptions="Center">
             <Button x:Name="MyButton" VerticalOptions="Center"
                 Text="Tap to See Menu Options" 
-                HorizontalOptions="Center"/>
+                HorizontalOptions="Center"
+                    Clicked="MyButton_Clicked"
+                    />
 
-        </VerticalStackLayout>
+
+        <Button x:Name="MyButtonTwo" VerticalOptions="Center"
+                Text="Tap to See Menu Options Two" 
+                HorizontalOptions="Center"
+                    Clicked="MyButton_Clicked"
+                    />
+
+    </VerticalStackLayout>
 
 </ContentPage>

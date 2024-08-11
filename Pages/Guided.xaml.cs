@@ -1,13 +1,25 @@
 namespace PayRemind.Pages;
+
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Platform;
+using PayRemind.Contracts;
+using PayRemind.MauiWrapper;
+using PayRemind.Platforms.Android;
+using PayRemind.Platforms.Android.Wrappers;
 
 public partial class Guided : ContentPage
 {
 
-    private CustomTooltip _myTooltip;
+    private CustomTooltip? _myTooltip;
 
+    private readonly IViewConverterService? _viewConverterService;
 
     public Guided()
+    {
+        InitializeComponent();
+    }
+
+    public Guided(IViewConverterService viewConverterService)
 	{
         InitializeComponent();
         _myTooltip = new CustomTooltip
@@ -18,8 +30,42 @@ public partial class Guided : ContentPage
         };
 
         MyButton.Clicked += ToggleTooltip;
+
     }
 
+    private async Task ShowFeatureHighlight(Button btn = null)
+    {
+        // Asegúrate de que estás ejecutando esto en el hilo de la UI
+
+        // Necesitamos la vista de Android para pasársela al servicio
+
+#if ANDROID
+        // Asegúrate de que el botón esté completamente cargado
+        //var platformButton = MyButton.ToPlatform(this.Handler.MauiContext);
+
+        //var activity = Platform.CurrentActivity;
+        //Microsoft.Maui.Controls.View nativeView = MyButton;
+
+        // showCaseService.ShowFeatureHighlight(nativeView.Id, "Guide Title", "Guide Description");
+
+        await Task.Delay(100);
+
+        if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+
+            var viewConverterService = DependencyService.Get<IViewConverterService>();
+
+            Android.Views.View nativeView = viewConverterService.GetNativeView(MyButton);
+
+                if (nativeView != null)
+                {
+                    ShowCaseViewWrapper.ShowGuideView(nativeView, "Welcome!", "This is a sample button. Tap it to perform an action.");
+                }
+
+            }
+
+#endif
+    }
 
     private void ToggleTooltip(object sender, EventArgs e)
     {
@@ -40,15 +86,20 @@ public partial class Guided : ContentPage
         //_myTooltip.ShowAt(MyButton, offsetY: 10);
 
         MyButton.SizeChanged += OnButtonSizeChanged;
+
+
     }
 
     private void OnButtonSizeChanged(object sender, EventArgs e)
     {
         if (MyButton.Width > 0 && MyButton.Height > 0)
         {
-            Dispatcher.Dispatch(() =>
+            Dispatcher.Dispatch(async () =>
             {
                 if (!MyButton.IsVisible) return;
+
+               await ShowFeatureHighlight();
+
 
                 //_myTooltip.ShowAt(MyButton, offsetY: 10, offsetX: 0);
             });
@@ -58,4 +109,8 @@ public partial class Guided : ContentPage
         }
     }
 
+    private async void MyButton_Clicked(object sender, EventArgs e)
+    {
+       await ShowFeatureHighlight();
+    }
 }

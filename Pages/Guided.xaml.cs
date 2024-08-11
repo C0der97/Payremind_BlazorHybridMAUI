@@ -56,10 +56,11 @@ public partial class Guided : ContentPage
             var viewConverterService = DependencyService.Get<IViewConverterService>();
 
             Android.Views.View nativeView = viewConverterService.GetNativeView(MyButton);
+            Android.Views.View nativeView2 = viewConverterService.GetNativeView(MyButtonTwo);
 
-                if (nativeView != null)
+            if (nativeView != null)
                 {
-                    ShowCaseViewWrapper.ShowGuideView(nativeView, "Welcome!", "This is a sample button. Tap it to perform an action.");
+                    ShowCaseViewWrapper.ShowGuideView(nativeView, nativeView2, "Welcome!", "This is a sample button. Tap it to perform an action.");
                 }
 
             }

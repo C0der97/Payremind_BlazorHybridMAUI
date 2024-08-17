@@ -61,6 +61,7 @@
 
         <mauiPages:DialPage></mauiPages:DialPage>
         <mauiPages:Guided></mauiPages:Guided>
+        <local:Alarms></local:Alarms>
 
     </TabbedPage.Children>
 </TabbedPage>

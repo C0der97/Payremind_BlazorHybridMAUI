@@ -77,6 +77,10 @@ namespace PayRemind
             builder.Services.AddSingleton<IViewConverterService, ViewConverterService>();
 
             DependencyService.Register<IViewConverterService, ViewConverterService>();
+            DependencyService.Register<IAlarmService, AlarmManagerService>();
+
+           // builder.Services.AddTransient<IAlarmService, AlarmManagerService>();
+
 #endif
 
             builder.Services.AddSingleton(new SQLiteDatabaseService(dbPath));

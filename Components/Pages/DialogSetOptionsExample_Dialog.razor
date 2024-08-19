@@ -159,6 +159,10 @@
 
             if (DeviceInfo.Current.Platform == DevicePlatform.Android)
             {
+
+                notification.Android.Priority = Plugin.LocalNotification.AndroidOption.AndroidPriority.High;
+                notification.Android.VisibilityType = Plugin.LocalNotification.AndroidOption.AndroidPriority.Public;
+
                 await LocalNotificationCenter.Current.Show(notification);
             }
 

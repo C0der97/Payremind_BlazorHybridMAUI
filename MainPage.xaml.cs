@@ -172,6 +172,8 @@ namespace PayRemind
 
                     await Permissions.RequestAsync<Permissions.Reminders>();
                     await Permissions.RequestAsync<Permissions.Battery>();
+                    await Permissions.RequestAsync<Permissions.PostNotifications>();
+
 
                     if (DeviceInfo.Platform == DevicePlatform.Android)
                     {

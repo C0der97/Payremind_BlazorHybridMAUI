@@ -12,12 +12,17 @@ namespace PayRemind.Platforms.Android
         public override void OnReceive(Context context, Intent intent)
         {
             var channelId = "alarm_channel";
-            var notificationId = 100;
+            Random rnd = new Random();
+
+            var notificationId = rnd.Next();
+
+
+            string valueString = intent?.GetStringExtra("name_reminder") ?? "";
 
             var notificationBuilder = new NotificationCompat.Builder(context, channelId)
                 .SetSmallIcon(Resource.Drawable.mtrl_ic_indeterminate)
-                .SetContentTitle("Alarma")
-                .SetContentText("¡Es hora de tu alarma!")
+                .SetContentTitle("Recordatorio de Pago ")
+                .SetContentText(valueString)
                 .SetPriority(NotificationCompat.PriorityHigh)
                 .SetAutoCancel(true);
 

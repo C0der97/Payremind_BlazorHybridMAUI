@@ -38,7 +38,7 @@ public partial class Alarms : ContentPage
 
 
         var alarmTime = DateTime.Now.AddMinutes(1); // Ejemplo: alarma en 5 minutos
-        _alarmService.SetAlarm(alarmTime);
+        _alarmService.SetAlarm(alarmTime, "Em bimcho");
         DisplayAlert("Alarma configurada", $"La alarma se activará a las {alarmTime.ToString("HH:mm")}", "OK");
     }
 }

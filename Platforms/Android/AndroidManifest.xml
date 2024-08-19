@@ -43,8 +43,6 @@
         </receiver>
 	
 	</application>
-<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 	<!-- Right Permissions -->
     <uses-permission android:name="android.permission.SET_ALARM" />
 	<uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -54,7 +52,6 @@
     <uses-permission android:name="android.permission.CALL_PRIVILEGED" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
@@ -66,9 +63,13 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
 
-
     <uses-permission android:name="android.permission.INTERNET" />
+     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+        <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+          <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 	<uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

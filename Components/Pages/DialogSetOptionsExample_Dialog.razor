@@ -1,4 +1,7 @@
-﻿@using CommunityToolkit.Mvvm.Messaging
+﻿@using Android.App
+@using Android.Content
+@using CommunityToolkit.Mvvm.Messaging
+@using PayRemind.Contracts
 @using PayRemind.Messages
 @using Plugin.LocalNotification
 @using PayRemind.Shared
@@ -98,6 +101,24 @@
     {
         try
         {
+
+#if ANDROID
+    if (OperatingSystem.IsAndroidVersionAtLeast(31)) // Android 12 y superior
+    {
+        var context = Android.App.Application.Context;
+        var alarmManager = context.GetSystemService(Context.AlarmService) as AlarmManager;
+        if (alarmManager != null && !alarmManager.CanScheduleExactAlarms())
+        {
+            // Necesitamos solicitar permiso al usuario
+            var intent = new Intent(Android.Provider.Settings.ActionRequestScheduleExactAlarm);
+            intent.AddFlags(ActivityFlags.NewTask);
+            context.StartActivity(intent);
+            return;
+        }
+    }
+#endif
+
+
             if (selectedDate == string.Empty || SelectedTime == string.Empty)
             {
                 Snackbar.Add("Complete el formulario", Severity.Warning, config => { 
@@ -117,7 +138,13 @@
 
             int idNotification = rnd.Next();
 
-            var notification = new NotificationRequest
+
+            IAlarmService _alarmService = DependencyService.Get<IAlarmService>();
+
+            _alarmService.SetAlarm(notificationData.DateTime, $"Por Monto de: ${notificationData.Amount:F2}");
+
+
+            NotificationRequest notification = new NotificationRequest
                 {
                     NotificationId = idNotification,
                     Title = "Recordatorio de pago: " + notificationData.Name,

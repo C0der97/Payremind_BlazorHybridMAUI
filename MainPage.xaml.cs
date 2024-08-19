@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using Android.Content;
+using Android.OS;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.JSInterop;
 using PayRemind.Data;
 using PayRemind.Messages;
@@ -12,6 +14,7 @@ namespace PayRemind
 
         private DateTime _selectedDateTime;
 
+        private bool _isInitialized = false;
 
 
         public MainPage()
@@ -63,22 +66,22 @@ namespace PayRemind
                 }
 
 
-                if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
-                {
-                    await LocalNotificationCenter.Current.RequestNotificationPermission();
-                }
+                //if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
+                //{
+                //    await LocalNotificationCenter.Current.RequestNotificationPermission();
+                //}
 
-                await Permissions.RequestAsync<Permissions.Phone>();
-                await Permissions.RequestAsync<Permissions.ContactsRead>();
-                await Permissions.RequestAsync<Permissions.Reminders>();
-                await Permissions.RequestAsync<Permissions.Speech>();
-                await Permissions.RequestAsync<Permissions.Battery>();
-                await Permissions.RequestAsync<Permissions.PostNotifications>();
-                await Permissions.RequestAsync<Permissions.StorageRead>();
-                await Permissions.RequestAsync<Permissions.StorageWrite>();
-                await Permissions.RequestAsync<Permissions.Microphone>();
-                await Permissions.RequestAsync<Permissions.ContactsWrite>();
-                await Permissions.RequestAsync<Permissions.LaunchApp>();
+                //await Permissions.RequestAsync<Permissions.Phone>();
+                //await Permissions.RequestAsync<Permissions.ContactsRead>();
+                //await Permissions.RequestAsync<Permissions.Reminders>();
+                //await Permissions.RequestAsync<Permissions.Speech>();
+                //await Permissions.RequestAsync<Permissions.Battery>();
+                //await Permissions.RequestAsync<Permissions.PostNotifications>();
+                //await Permissions.RequestAsync<Permissions.StorageRead>();
+                //await Permissions.RequestAsync<Permissions.StorageWrite>();
+                //await Permissions.RequestAsync<Permissions.Microphone>();
+                //await Permissions.RequestAsync<Permissions.ContactsWrite>();
+                //await Permissions.RequestAsync<Permissions.LaunchApp>();
 
             });
 
@@ -145,14 +148,77 @@ namespace PayRemind
             return Task.CompletedTask;
         }
 
+
         protected override void OnAppearing()
         {
             base.OnAppearing();
+            if (!_isInitialized)
+            {
+                _isInitialized = true;
+                Initialize();
+            }
         }
+
+
+        private void Initialize()
+        {
+            try
+            {
+                Dispatcher.Dispatch(async () =>
+                {
+                    if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
+                    {
+                        await LocalNotificationCenter.Current.RequestNotificationPermission();
+                    }
+
+                    await Permissions.RequestAsync<Permissions.Phone>();
+                    await Permissions.RequestAsync<Permissions.ContactsRead>();
+                    await Permissions.RequestAsync<Permissions.Reminders>();
+                    await Permissions.RequestAsync<Permissions.Speech>();
+                    await Permissions.RequestAsync<Permissions.Battery>();
+                    await Permissions.RequestAsync<Permissions.PostNotifications>();
+                    await Permissions.RequestAsync<Permissions.StorageRead>();
+                    await Permissions.RequestAsync<Permissions.StorageWrite>();
+                    await Permissions.RequestAsync<Permissions.Microphone>();
+                    await Permissions.RequestAsync<Permissions.ContactsWrite>();
+                    await Permissions.RequestAsync<Permissions.LaunchApp>();
+
+                    if (DeviceInfo.Platform == DevicePlatform.Android)
+                    {
+                        RequestBatteryOptimizationExemption();
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
 
         private void FabButton_Clicked(object sender, EventArgs e)
         {
             WeakReferenceMessenger.Default.Send(new OpenDialog(true));
+        }
+
+        private void RequestBatteryOptimizationExemption()
+        {
+
+#if ANDROID
+            Android.App.Activity? context = Platform.CurrentActivity;
+            string? packageName = context?.PackageName ?? "";
+            PowerManager? powerManager = (PowerManager)context.GetSystemService(Context.PowerService);
+
+            if (powerManager != null && !powerManager.IsIgnoringBatteryOptimizations(packageName))
+            {
+                var intent = new Intent();
+                intent?.SetAction(Android.Provider.Settings.ActionRequestIgnoreBatteryOptimizations);
+                intent?.SetData(Android.Net.Uri.Parse($"package:{packageName}"));
+                context?.StartActivity(intent);
+            }
+#endif
+
+
         }
     }
 }

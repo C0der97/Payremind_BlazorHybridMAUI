@@ -11,7 +11,6 @@
 
 
 @using CommunityToolkit.Mvvm.Messaging
-@using Maui.NullableDateTimePicker
 @using MudBlazor
 @using PayRemind.Messages
 @using PayRemind.Shared
@@ -50,6 +49,9 @@
     }
 </style>
 
+<h3 class="text-center">Creación de Recordatorios</h3>
+
+
 @foreach (var item in Items)
 {
     <MudPaper Class="pa-4 my-4" Elevation="3">
@@ -67,9 +69,9 @@
             @if (!item.IsPaid)
             {
                 <MudCardActions>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+     @*                <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                    Color="Color.Info"
-                                   OnClick="() => EditItem(item)" />
+                                   OnClick="() => EditItem(item)" /> *@
                     <MudIconButton Icon="@Icons.Material.Filled.Cached"
                                    Color="Color.Default"
                                    OnClick="() => RescheduleNotification(item)" />
@@ -96,7 +98,24 @@ Variant="Variant.Filled"
 
 @code {
 
-    AppTheme currentTheme = Application.Current.RequestedTheme;
+    private AppTheme? currentTheme;
+
+    public AppTheme? CurrentTheme
+    {
+        get
+
+        {
+
+            if (Application.Current != null)
+            {
+                return Application.Current.RequestedTheme;
+            }
+
+            return null;
+        }
+        set { currentTheme = Application.Current != null ? Application.Current.RequestedTheme : null ; }
+    }
+
 
     private NotificationData notificationData = new NotificationData();
 
@@ -121,15 +140,6 @@ Variant="Variant.Filled"
         }
     }
 
-    NullableDateTimePicker dateTimePicker = new NullableDateTimePicker();
-
-    private static void OnNullableDateTimeChanged(object sender, DateTimeChangedEventArgs e)
-    {
-        Console.WriteLine("DateTime changed!");
-        Console.WriteLine("Old DateTime: " + e.OldDateTime);
-        Console.WriteLine("New DateTime: " + e.NewDateTime);
-    }
-
     protected override async Task OnInitializedAsync()
     {
         if (currentTheme == AppTheme.Light)
@@ -147,13 +157,9 @@ Variant="Variant.Filled"
             {
                 OpenDialogAsync();
             }
-            
+
         });
 
-
-
-
-        dateTimePicker.NullableDateTimeChanged += OnNullableDateTimeChanged;
 
         notifications = await DatabaseService.GetNotificationsAsync(false);
 
@@ -182,43 +188,21 @@ Variant="Variant.Filled"
     }
 
 
-    async Task OpenCalendar()
-    {
-        StateHasChanged();
-
-        INullableDateTimePickerOptions nullableDateTimePickerOptions = new NullableDateTimePickerOptions
-            {
-                NullableDateTime = DateTime.Now,
-                Mode = PickerModes.DateTime,
-                ShowWeekNumbers = true
-            };
-
-        var result = await NullableDateTimePicker.OpenCalendarAsync(nullableDateTimePickerOptions);
-
-        if (result is PopupResult popupResult && popupResult.ButtonResult != PopupButtons.Cancel)
-        {
-            var MyDateTime = popupResult.NullableDateTime;
-            datePart = MyDateTime?.Date ?? DateTime.Now.Date;
-            timePart = MyDateTime?.TimeOfDay ?? DateTime.Now.TimeOfDay;
-            Console.WriteLine("Fecha: " + MyDateTime.ToString());
-        }
-
-        StateHasChanged();
-    }
-
-
-
 
 
 
     private void UpdateTimePart(ChangeEventArgs e)
     {
-        timePartString = e.Value.ToString();
+        timePartString = e.Value?.ToString() ?? "";
     }
 
     async Task<bool> MarAsPayed(SwipeItemNotification item)
     {
         selectedNotification = notifications.Where((x) => x.Id == item.Id).FirstOrDefault() ?? new NotificationData();
+
+        if (Application.Current?.MainPage != null)
+        {
+            
 
         bool answer = await Application.Current.MainPage.DisplayAlert("Confirmación", "¿Estás seguro que deseas realizar esta acción?", "Sí", "No");
 
@@ -241,6 +225,9 @@ Variant="Variant.Filled"
 
         }
 
+        }
+
+
         return await Task.FromResult(true);
     }
 
@@ -248,6 +235,8 @@ Variant="Variant.Filled"
     {
         selectedNotification = notifications.Where((x) => x.Id == item.Id).FirstOrDefault() ?? new NotificationData();
 
+        if (Application.Current?.MainPage != null)
+        {
 
         bool answer = await Application.Current.MainPage.DisplayAlert("Confirmación", "¿Estás seguro que deseas realizar esta acción?", "Sí", "No");
 
@@ -268,45 +257,10 @@ Variant="Variant.Filled"
             ReloadItems();
         }
 
+        }
 
 
         return await Task.FromResult(true);
-    }
-
-
-
-
-    private async Task TouchStart(TouchEventArgs e, SwipeItemNotification item)
-    {
-        if (!item.IsPaid)
-        {
-            item.StartX = e.Touches[0].ClientX;
-        }
-
-    }
-
-    private async Task TouchMove(TouchEventArgs e, SwipeItemNotification item)
-    {
-        if (!item.IsPaid)
-        {
-            var currentX = e.Touches[0].ClientX;
-            var diff = item.StartX - currentX;
-
-            if (diff > 0 && diff <= 200)
-            {
-                await JSRuntime.InvokeVoidAsync("eval", $"document.querySelector('[_bl_{item.ElementReference.Id}] .swipe-actions').style.transform = 'translateX(-{diff}px)'");
-            }
-
-        }
-    }
-
-    private async Task TouchEnd(SwipeItemNotification item)
-    {
-        if (!item.IsPaid)
-        {
-            await JSRuntime.InvokeVoidAsync("eval", $"document.querySelector('[_bl_{item.ElementReference.Id}] .swipe-actions').style.transform = 'translateX(-150px)'");
-
-        }
     }
 
     private void EditItem(SwipeItemNotification item)

@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Maui;
-using Maui.NullableDateTimePicker;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
 using MudBlazor.Services;
@@ -21,8 +20,7 @@ namespace PayRemind
             string dbPath = Path.Combine(FileSystem.AppDataDirectory, "notifications.db");
 
             var builder = MauiApp.CreateBuilder();
-            builder.UseMauiApp<App>()
-                .ConfigureNullableDateTimePicker().
+            builder.UseMauiApp<App>().
                 UseLocalNotification().ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -72,8 +70,6 @@ namespace PayRemind
 #endif
 
 #if ANDROID
-            builder.Services.AddSingleton<PhoneCallReceiver>();
-            builder.Services.AddSingleton<ICallHandler, CallHandlingService>();
             builder.Services.AddSingleton<IViewConverterService, ViewConverterService>();
 
             DependencyService.Register<IViewConverterService, ViewConverterService>();

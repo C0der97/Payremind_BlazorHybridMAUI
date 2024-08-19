@@ -171,17 +171,9 @@ namespace PayRemind
                         await LocalNotificationCenter.Current.RequestNotificationPermission();
                     }
 
-                    await Permissions.RequestAsync<Permissions.Phone>();
-                    await Permissions.RequestAsync<Permissions.ContactsRead>();
                     await Permissions.RequestAsync<Permissions.Reminders>();
-                    await Permissions.RequestAsync<Permissions.Speech>();
                     await Permissions.RequestAsync<Permissions.Battery>();
                     await Permissions.RequestAsync<Permissions.PostNotifications>();
-                    await Permissions.RequestAsync<Permissions.StorageRead>();
-                    await Permissions.RequestAsync<Permissions.StorageWrite>();
-                    await Permissions.RequestAsync<Permissions.Microphone>();
-                    await Permissions.RequestAsync<Permissions.ContactsWrite>();
-                    await Permissions.RequestAsync<Permissions.LaunchApp>();
 
                     if (DeviceInfo.Platform == DevicePlatform.Android)
                     {

@@ -9,32 +9,43 @@ namespace PayRemind.Platforms.Android
     public class AlarmOwnReceiver : BroadcastReceiver
     {
 
-        public override void OnReceive(Context context, Intent intent)
+        public override void OnReceive(Context? context, Intent? intent)
         {
+
+            if (intent == null || context == null)
+            {
+                return;
+            }
+
             var channelId = "alarm_channel";
-            Random rnd = new Random();
+            Random rnd = new();
 
             var notificationId = rnd.Next();
 
 
             string valueString = intent?.GetStringExtra("name_reminder") ?? "";
 
-            var notificationBuilder = new NotificationCompat.Builder(context, channelId)
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, channelId)
                 .SetSmallIcon(Resource.Drawable.mtrl_ic_indeterminate)
                 .SetContentTitle("Recordatorio de Pago ")
                 .SetContentText(valueString)
                 .SetPriority(NotificationCompat.PriorityHigh)
                 .SetAutoCancel(true);
 
-            var notificationManager = (NotificationManager)context.GetSystemService(Context.NotificationService);
-
-            if (OperatingSystem.IsAndroidVersionAtLeast(26))
+            if (context != null)
             {
-                var channel = new NotificationChannel(channelId, "Alarmas", NotificationImportance.High);
-                notificationManager.CreateNotificationChannel(channel);
+                NotificationManager? notificationManager = context?.GetSystemService(Context.NotificationService) as NotificationManager;
+
+                if (OperatingSystem.IsAndroidVersionAtLeast(26))
+                {
+                    NotificationChannel channel = new(channelId, "Alarmas", NotificationImportance.High);
+                    notificationManager?.CreateNotificationChannel(channel);
+                }
+
+                notificationManager?.Notify(notificationId, notificationBuilder.Build());
             }
 
-            notificationManager.Notify(notificationId, notificationBuilder.Build());
+      
         }
 
 

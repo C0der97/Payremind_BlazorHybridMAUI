@@ -11,22 +11,27 @@ namespace PayRemind.Platforms.Android
             Context context = Platform.AppContext;
             long triggerAtMillis = new DateTimeOffset(alarmTime.ToUniversalTime()).ToUnixTimeMilliseconds();
 
-            AlarmManager? alarmManager = (AlarmManager)context.GetSystemService(Context.AlarmService);
-            Intent intent = new Intent(context, typeof(AlarmOwnReceiver));
+            AlarmManager? alarmManager = context.GetSystemService(Context.AlarmService) as AlarmManager;
+            Intent intent = new(context, typeof(AlarmOwnReceiver));
 
             intent.PutExtra("name_reminder", name_reminder);
 
 
             PendingIntent? pendingIntent = PendingIntent.GetBroadcast(context, 0, intent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
 
-            if (OperatingSystem.IsAndroidVersionAtLeast(31)) // Android 12 y superior
+            if (pendingIntent != null)
             {
-                alarmManager?.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerAtMillis, pendingIntent);
+                if (OperatingSystem.IsAndroidVersionAtLeast(31)) // Android 12 y superior
+                {
+                    alarmManager?.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerAtMillis, pendingIntent);
+                }
+                else
+                {
+                    alarmManager?.SetExact(AlarmType.RtcWakeup, triggerAtMillis, pendingIntent);
+                }
             }
-            else
-            {
-                alarmManager?.SetExact(AlarmType.RtcWakeup, triggerAtMillis, pendingIntent);
-            }
+
+      
         }
     }
 }

@@ -139,9 +139,9 @@
             int idNotification = rnd.Next();
 
 
-            IAlarmService _alarmService = DependencyService.Get<IAlarmService>();
+            // IAlarmService _alarmService = DependencyService.Get<IAlarmService>();
 
-            _alarmService.SetAlarm(notificationData.DateTime, $"Por Monto de: ${notificationData.Amount:F2}");
+            // _alarmService.SetAlarm(notificationData.DateTime, $"Por Monto de: ${notificationData.Amount:F2}");
 
 
             NotificationRequest notification = new NotificationRequest
@@ -151,7 +151,7 @@
                     Description = $"Por Monto de: ${notificationData.Amount:F2}",
                     Schedule = new NotificationRequestSchedule
                     {
-                        NotifyTime = notificationData.DateTime
+                        NotifyTime = notificationData.DateTime,
                     },
                     Group = "Reminders",
                     CategoryType = NotificationCategoryType.Reminder
@@ -161,7 +161,7 @@
             {
 
                 notification.Android.Priority = Plugin.LocalNotification.AndroidOption.AndroidPriority.High;
-                notification.Android.VisibilityType = Plugin.LocalNotification.AndroidOption.AndroidPriority.Public;
+                notification.Android.VisibilityType = Plugin.LocalNotification.AndroidOption.AndroidVisibilityType.Public;
 
                 await LocalNotificationCenter.Current.Show(notification);
             }

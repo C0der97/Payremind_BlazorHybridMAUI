@@ -50,7 +50,23 @@
 
 @code {
 
-    AppTheme currentTheme = Application.Current.RequestedTheme;
+    private AppTheme? currentTheme;
+
+    public AppTheme? CurrentTheme
+    {
+        get
+
+        {
+
+            if (Application.Current != null)
+            {
+                return Application.Current.RequestedTheme;
+            }
+
+            return null;
+        }
+        set { currentTheme = Application.Current != null ? Application.Current.RequestedTheme : null; }
+    }
 
 
     private List<NotificationData> notifications = new();

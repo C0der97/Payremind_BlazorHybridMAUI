@@ -9,7 +9,6 @@ using PayRemind.Contracts;
 using PayRemind.Platforms.Android;
 #endif
 using PayRemind.Shared;
-using Plugin.LocalNotification;
 
 namespace PayRemind
 {
@@ -20,32 +19,10 @@ namespace PayRemind
             string dbPath = Path.Combine(FileSystem.AppDataDirectory, "notifications.db");
 
             var builder = MauiApp.CreateBuilder();
-            builder.UseMauiApp<App>().
-                UseLocalNotification().ConfigureFonts(fonts =>
+            builder.UseMauiApp<App>().ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-            })
-                .ConfigureLifecycleEvents(events =>
-                {
-#if ANDROID
-                events.AddAndroid(android => android.OnNewIntent((activity, intent) =>
-                {
-                    if (intent.Action == Android.Content.Intent.ActionCall)
-                    {
-                        var uri = intent.Data;
-                        if (uri != null)
-                        {
-                            var phoneNumber = uri.SchemeSpecificPart;
-                            // Aquí puedes manejar el número de teléfono,
-                            // por ejemplo, navegando a tu página de marcación
-                            // o iniciando directamente la llamada
-                        }
-                    }
-                }));
-#endif
-
-                })
-                .UseMauiCommunityToolkit().UseSentry(options => {
+            }).UseMauiCommunityToolkit().UseSentry(options => {
                 // The DSN is the only required setting.
                 options.Dsn = "https://42213245402bf788a901d07f056950d4@o4507708174958592.ingest.us.sentry.io/4507708177448960";
 

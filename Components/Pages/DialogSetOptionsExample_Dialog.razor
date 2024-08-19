@@ -3,7 +3,6 @@
 @using CommunityToolkit.Mvvm.Messaging
 @using PayRemind.Contracts
 @using PayRemind.Messages
-@using Plugin.LocalNotification
 @using PayRemind.Shared
 @using Microsoft.Maui.Controls
 
@@ -139,31 +138,31 @@
             int idNotification = rnd.Next();
 
 
-            // IAlarmService _alarmService = DependencyService.Get<IAlarmService>();
+            IAlarmService _alarmService = DependencyService.Get<IAlarmService>();
 
-            // _alarmService.SetAlarm(notificationData.DateTime, $"Por Monto de: ${notificationData.Amount:F2}");
+            _alarmService.SetAlarm(notificationData.DateTime, $"Por Monto de: ${notificationData.Amount:F2}");
 
 
-            NotificationRequest notification = new NotificationRequest
-                {
-                    NotificationId = idNotification,
-                    Title = "Recordatorio de pago: " + notificationData.Name,
-                    Description = $"Por Monto de: ${notificationData.Amount:F2}",
-                    Schedule = new NotificationRequestSchedule
-                    {
-                        NotifyTime = notificationData.DateTime,
-                    },
-                    Group = "Reminders",
-                    CategoryType = NotificationCategoryType.Reminder
-                };
+            // NotificationRequest notification = new NotificationRequest
+            //     {
+            //         NotificationId = idNotification,
+            //         Title = "Recordatorio de pago: " + notificationData.Name,
+            //         Description = $"Por Monto de: ${notificationData.Amount:F2}",
+            //         Schedule = new NotificationRequestSchedule
+            //         {
+            //             NotifyTime = notificationData.DateTime,
+            //         },
+            //         Group = "Reminders",
+            //         CategoryType = NotificationCategoryType.Reminder
+            //     };
 
             if (DeviceInfo.Current.Platform == DevicePlatform.Android)
             {
 
-                notification.Android.Priority = Plugin.LocalNotification.AndroidOption.AndroidPriority.High;
-                notification.Android.VisibilityType = Plugin.LocalNotification.AndroidOption.AndroidVisibilityType.Public;
+                // notification.Android.Priority = Plugin.LocalNotification.AndroidOption.AndroidPriority.High;
+                // notification.Android.VisibilityType = Plugin.LocalNotification.AndroidOption.AndroidVisibilityType.Public;
 
-                await LocalNotificationCenter.Current.Show(notification);
+                // await LocalNotificationCenter.Current.Show(notification);
             }
 
             notificationData.NotificationId = idNotification;

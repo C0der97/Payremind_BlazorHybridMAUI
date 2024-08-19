@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.JSInterop;
 using PayRemind.Data;
 using PayRemind.Messages;
-using Plugin.LocalNotification;
 
 namespace PayRemind
 {
@@ -166,14 +165,13 @@ namespace PayRemind
             {
                 Dispatcher.Dispatch(async () =>
                 {
-                    if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
-                    {
-                        await LocalNotificationCenter.Current.RequestNotificationPermission();
-                    }
+                    //if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
+                    //{
+                    //    await LocalNotificationCenter.Current.RequestNotificationPermission();
+                    //}
 
                     await Permissions.RequestAsync<Permissions.Reminders>();
                     await Permissions.RequestAsync<Permissions.Battery>();
-                    await Permissions.RequestAsync<Permissions.PostNotifications>();
 
                     if (DeviceInfo.Platform == DevicePlatform.Android)
                     {

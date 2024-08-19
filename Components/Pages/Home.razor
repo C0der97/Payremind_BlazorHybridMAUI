@@ -14,7 +14,6 @@
 @using MudBlazor
 @using PayRemind.Messages
 @using PayRemind.Shared
-@using Plugin.LocalNotification
 @using Microsoft.Extensions.DependencyInjection
 
 
@@ -214,10 +213,10 @@ Variant="Variant.Filled"
 
             notifications = await DatabaseService.GetNotificationsAsync(false);
 
-            int[] cancelIds = [selectedNotification.NotificationId];
-            var resultCancel = LocalNotificationCenter.Current.Cancel(cancelIds);
+            // int[] cancelIds = [selectedNotification.NotificationId];
+            // var resultCancel = LocalNotificationCenter.Current.Cancel(cancelIds);
 
-            var pending = await LocalNotificationCenter.Current.GetPendingNotificationList();
+            // var pending = await LocalNotificationCenter.Current.GetPendingNotificationList();
 
             StateService.NotifyStateChanged();
 
@@ -277,8 +276,8 @@ Variant="Variant.Filled"
             };
 
         await DatabaseService.DeleteNotificationAsync(notification);
-        int[] cancelIds = [notification.NotificationId];
-        LocalNotificationCenter.Current.Cancel(cancelIds);
+        // int[] cancelIds = [notification.NotificationId];
+        // LocalNotificationCenter.Current.Cancel(cancelIds);
 
 
         Items.Remove(item);

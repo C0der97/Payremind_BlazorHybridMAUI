@@ -1,6 +1,7 @@
 ﻿using Android.App;
 using Android.Content;
 using PayRemind.Contracts;
+using static Android.Icu.Text.CaseMap;
 
 namespace PayRemind.Platforms.Android
 {
@@ -10,15 +11,17 @@ namespace PayRemind.Platforms.Android
         {
             Context context = Platform.AppContext;
             long triggerAtMillis = new DateTimeOffset(alarmTime.ToUniversalTime()).ToUnixTimeMilliseconds();
-
             AlarmManager? alarmManager = context.GetSystemService(Context.AlarmService) as AlarmManager;
+
+            // Genera un ID único para cada alarma
+            int uniqueId = (int)(DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond);
+
             Intent intent = new(context, typeof(AlarmOwnReceiver));
-
             intent.PutExtra("name_reminder", name_reminder);
-            intent.PutExtra("tittle_reminder", tittle);
+            intent.PutExtra("title_reminder", tittle);
+            intent.PutExtra("alarm_id", uniqueId);  // Añade el ID único a los extras
 
-
-            PendingIntent? pendingIntent = PendingIntent.GetBroadcast(context, 0, intent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
+            PendingIntent? pendingIntent = PendingIntent.GetBroadcast(context, uniqueId, intent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
 
             if (pendingIntent != null)
             {
@@ -31,8 +34,6 @@ namespace PayRemind.Platforms.Android
                     alarmManager?.SetExact(AlarmType.RtcWakeup, triggerAtMillis, pendingIntent);
                 }
             }
-
-      
         }
     }
 }

@@ -27,6 +27,9 @@
                 <!-- Otros estilos -->
             </Style>
 
+            <Color x:Key="LightBackgroundColor">#FFFFFF</Color>
+            <Color x:Key="DarkBackgroundColor">#32323d</Color>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

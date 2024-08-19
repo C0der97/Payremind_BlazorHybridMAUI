@@ -9,6 +9,7 @@ using Android.Widget;
 using CommunityToolkit.Mvvm.Messaging;
 using PayRemind.Messages;
 using PayRemind.Pages;
+using PayRemind.Platforms.Android;
 using PayRemind.Platforms.Android.Wrappers;
 using PayRemind.Wrappers;
 
@@ -145,10 +146,15 @@ namespace PayRemind
 
             }
 
-        
+
 
             //var serviceIntent = new Intent(this, typeof(CallService));
             //StartForegroundService(serviceIntent);
+
+
+
+            var serviceIntent = new Intent(this, typeof(NotificationForegroundServiceOwn));
+            StartForegroundService(serviceIntent);
 
 
             if (Intent != null &&  Intent.GetBooleanExtra("OpenCallPage", false))

@@ -24,10 +24,11 @@ namespace PayRemind.Platforms.Android
 
 
             string valueString = intent?.GetStringExtra("name_reminder") ?? "";
+            string tittle = intent?.GetStringExtra("tittle_reminder") ?? "";
 
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, channelId)
                 .SetSmallIcon(Resource.Drawable.mtrl_ic_indeterminate)
-                .SetContentTitle("Recordatorio de Pago ")
+                .SetContentTitle("Recordatorio de Pago "+ tittle)
                 .SetContentText(valueString)
                 .SetPriority(NotificationCompat.PriorityHigh)
                 .SetAutoCancel(true);

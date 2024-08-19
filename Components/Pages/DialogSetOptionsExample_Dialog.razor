@@ -140,7 +140,7 @@
 
             IAlarmService _alarmService = DependencyService.Get<IAlarmService>();
 
-            _alarmService.SetAlarm(notificationData.DateTime, $"Por Monto de: ${notificationData.Amount:F2}");
+            _alarmService.SetAlarm(notificationData.DateTime, $"Por Monto de: ${notificationData.Amount:F2}", notificationData.Name);
 
 
             // NotificationRequest notification = new NotificationRequest

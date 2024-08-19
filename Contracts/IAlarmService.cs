@@ -2,6 +2,6 @@
 {
     public interface IAlarmService
     {
-        void SetAlarm(DateTime alarmTime, string name_reminder);
+        void SetAlarm(DateTime alarmTime, string name_reminder, string tittle);
     }
 }

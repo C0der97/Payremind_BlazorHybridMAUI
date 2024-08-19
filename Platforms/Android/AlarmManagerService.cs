@@ -6,7 +6,7 @@ namespace PayRemind.Platforms.Android
 {
     public class AlarmManagerService : IAlarmService
     {
-        public void SetAlarm(DateTime alarmTime, string name_reminder)
+        public void SetAlarm(DateTime alarmTime, string name_reminder, string tittle)
         {
             Context context = Platform.AppContext;
             long triggerAtMillis = new DateTimeOffset(alarmTime.ToUniversalTime()).ToUnixTimeMilliseconds();
@@ -15,6 +15,7 @@ namespace PayRemind.Platforms.Android
             Intent intent = new(context, typeof(AlarmOwnReceiver));
 
             intent.PutExtra("name_reminder", name_reminder);
+            intent.PutExtra("tittle_reminder", tittle);
 
 
             PendingIntent? pendingIntent = PendingIntent.GetBroadcast(context, 0, intent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);

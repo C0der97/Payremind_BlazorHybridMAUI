@@ -27,12 +27,12 @@
         <ApplicationId>com.retrocode.payremind</ApplicationId>
 
         <!-- Versions -->
-        <ApplicationDisplayVersion>1.5</ApplicationDisplayVersion>
-        <ApplicationVersion>1.5</ApplicationVersion>
+        <ApplicationDisplayVersion>1.6</ApplicationDisplayVersion>
+        <ApplicationVersion>1.6</ApplicationVersion>
 
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">29.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">31.0</SupportedOSPlatformVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
         <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
@@ -71,6 +71,7 @@
       <AndroidSigningKeyPass>Payremind</AndroidSigningKeyPass>
       <AndroidCreatePackagePerAbi>True</AndroidCreatePackagePerAbi>
       <AndroidPackageFormat>apk</AndroidPackageFormat>
+      <AndroidLinkTool>r8</AndroidLinkTool>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-maccatalyst|AnyCPU'">
@@ -83,6 +84,17 @@
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-windows10.0.19041.0|AnyCPU'">
       <ApplicationTitle>PayRemindRMK</ApplicationTitle>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android34.0|AnyCPU'">
+      <ApplicationDisplayVersion>1.6</ApplicationDisplayVersion>
+      <ApplicationVersion>1.6</ApplicationVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android34.0|AnyCPU'">
+      <ApplicationDisplayVersion>1.6</ApplicationDisplayVersion>
+      <ApplicationVersion>1.6</ApplicationVersion>
+      <AndroidPackageFormat>apk</AndroidPackageFormat>
     </PropertyGroup>
 
     <ItemGroup>

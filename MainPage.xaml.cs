@@ -11,7 +11,6 @@ namespace PayRemind
     {
         private readonly AppTheme currentTheme = Application.Current == null ? AppTheme.Dark : Application.Current.RequestedTheme;
 
-        private DateTime _selectedDateTime;
 
         private bool _isInitialized = false;
 

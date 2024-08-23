@@ -142,6 +142,19 @@
 
             _alarmService.SetAlarm(notificationData.DateTime, $"Por Monto de: ${notificationData.Amount:F2}", notificationData.Name);
 
+            var googleCalendarUrl = GenerateGoogleCalendarUrl(notificationData);
+
+            try
+            {
+                await Launcher.OpenAsync(googleCalendarUrl);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al abrir la URL: {ex.Message}");
+                // Puedes mostrar un mensaje al usuario si la URL no se puede abrir
+                Snackbar.Add("No se pudo abrir el calendario de Google", Severity.Warning);
+            }
+
 
             // NotificationRequest notification = new NotificationRequest
             //     {
@@ -179,6 +192,21 @@
             Console.WriteLine(ex.Message);
         }
 
+    }
+
+    private string GenerateGoogleCalendarUrl(NotificationData notificationData)
+    {
+        // Convertir a UTC
+        var startTimeUtc = notificationData.DateTime.ToUniversalTime();
+        var endTimeUtc = startTimeUtc.AddMinutes(5); // Asumimos que el evento dura 1 hora
+
+        var startTime = startTimeUtc.ToString("yyyyMMddTHHmmssZ");
+        var endTime = endTimeUtc.ToString("yyyyMMddTHHmmssZ");
+
+        var title = Uri.EscapeDataString($"Recordatorio de pago: {notificationData.Name}");
+        var description = Uri.EscapeDataString($"Monto a pagar: ${notificationData.Amount:F2}");
+
+        return $"https://www.google.com/calendar/render?action=TEMPLATE&text={title}&dates={startTime}/{endTime}&details={description}";
     }
     
 }

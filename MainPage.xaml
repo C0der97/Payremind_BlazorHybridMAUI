@@ -8,6 +8,7 @@
              xmlns:android="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;assembly=Microsoft.Maui.Controls"
              android:TabbedPage.ToolbarPlacement="Bottom"
              android:TabbedPage.IsSwipePagingEnabled="False"
+             xmlns:custom="clr-namespace:PayRemind.Pages.Custom"
              BackgroundColor="{AppThemeBinding Light={StaticResource LightBackgroundColor}, Dark={StaticResource DarkBackgroundColor}}"
              >
 
@@ -44,7 +45,10 @@
             AbsoluteLayout.LayoutFlags="PositionProportional"
                         Clicked="FabButton_Clicked"
             />
-                
+
+                <custom:ShowcaseView x:Name="ShowcaseView" 
+                                     IsVisible="False" />
+
             </AbsoluteLayout>
 
         </ContentPage>

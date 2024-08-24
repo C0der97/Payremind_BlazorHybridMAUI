@@ -3,6 +3,7 @@ using Android.Content;
 using Android.OS;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.JSInterop;
+using Microsoft.Maui.Layouts;
 using PayRemind.Contracts;
 using PayRemind.Data;
 using PayRemind.MauiWrapper;
@@ -10,6 +11,8 @@ using PayRemind.MauiWrapper;
 //using PayRemind.Jobs.MyJob;
 using PayRemind.Messages;
 using PayRemind.Pages;
+using PayRemind.Pages.Custom;
+
 //using Shiny.Notifications;
 using Application = Microsoft.Maui.Controls.Application;
 //using Notification = Shiny.Notifications.Notification;
@@ -23,12 +26,15 @@ namespace PayRemind
 
         private bool _isInitialized = false;
 
+        private ShowcaseView _showcaseView;
+
 
 
 
         public MainPage()
         {
             InitializeComponent();
+
 
 
             //if (currentTheme == AppTheme.Light)
@@ -129,6 +135,31 @@ namespace PayRemind
             }
         }
 
+        private void SetupShowcase()
+        {
+            _showcaseView = this.FindByName<ShowcaseView>("ShowcaseView");
+            if (_showcaseView != null)
+            {
+                _showcaseView.AddShowcaseItem(FabButton, "Este es el botón para añadir un nuevo recordatorio");
+
+                // Asegurarse de que el ShowcaseView cubra toda la página
+                Grid.SetRowSpan(_showcaseView, int.MaxValue);
+                Grid.SetColumnSpan(_showcaseView, int.MaxValue);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("ShowcaseView no encontrado en el XAML");
+            }
+        }
+
+        private async void ShowShowcase()
+        {
+            if (_showcaseView != null)
+            {
+                await _showcaseView.Show();
+            }
+        }
+
         private void UpdateDateTimeLabel()
         {
             //selectedDateTime.Text = $"Selected: {_selectedDateTime:g}";
@@ -148,10 +179,19 @@ namespace PayRemind
         {
             base.OnAppearing();
 
+            if (!_isInitialized)
+            {
+                _isInitialized = true;
+                Initialize();
+                SetupShowcase();
+            }
 
 
 
 
+            FabButton.Loaded += OnFabButtonLoaded;
+
+   
 
             //Channel channel = new Channel
             //{
@@ -172,12 +212,7 @@ namespace PayRemind
 
             //_notificationManager.AddChannel(channel);
 
-            if (!_isInitialized)
-            {
-                _isInitialized = true;
-                Initialize();
-            }
-
+     
 
             //#if ANDROID
             //            if (OperatingSystem.IsAndroidVersionAtLeast(31)) // Android 12 y superior
@@ -207,6 +242,18 @@ namespace PayRemind
         }
 
 
+        private async void OnFabButtonLoaded(object sender, EventArgs e)
+        {
+            if (!App.TutorialDone)
+            {
+
+                await Task.Delay(3000);
+
+                //await ShowFeatureHighlight();
+                ShowShowcase();
+                App.TutorialDone = true;
+            }
+        }
         private void OnButtonSizeChanged(object sender, EventArgs e)
         {
 
@@ -311,8 +358,9 @@ namespace PayRemind
             {
                 //await ShowFeatureHighlight();
 
+                ShowShowcase();
+                App.TutorialDone = true;
 
-               
 
             }
             else
@@ -393,6 +441,12 @@ namespace PayRemind
 
             //var not =  await _notificationManager.GetNotification(uniId);
 
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            FabButton.Loaded -= OnFabButtonLoaded;
         }
     }
 }

@@ -1,5 +1,8 @@
 ﻿using Microsoft.Maui.Layouts;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
+using Microsoft.Maui.Controls.Shapes;
 
 namespace PayRemind.Pages.Custom
 {
@@ -7,9 +10,7 @@ namespace PayRemind.Pages.Custom
     {
         private AbsoluteLayout _layout;
         private BoxView _backgroundBox;
-        private BoxView _highlightBox;
-        private CustomShowcaseMessage _messageView;
-        private Label _messageLabel;
+        private Border _highlightBorder;
         private ObservableCollection<ShowcaseItem> _showcaseItems;
         private int _currentIndex = 0;
 
@@ -38,20 +39,21 @@ namespace PayRemind.Pages.Custom
             AbsoluteLayout.SetLayoutBounds(_backgroundBox, new Rect(0, 0, 1, 1));
             AbsoluteLayout.SetLayoutFlags(_backgroundBox, AbsoluteLayoutFlags.All);
 
-            _highlightBox = new BoxView
+            _highlightBorder = new Border
             {
-                Color = Colors.Yellow.WithAlpha(0.4f),
-                InputTransparent = true
-            };
-
-            _messageView = new CustomShowcaseMessage
-            {
-                IsVisible = true, // Asegurarse de que sea visible
+                Stroke = Colors.Yellow,
+                StrokeThickness = 4,
+                StrokeShape = new RoundRectangle
+                {
+                    CornerRadius = new CornerRadius(8)
+                },
+                BackgroundColor = Colors.Transparent,
+                InputTransparent = true,
+                Opacity = 0
             };
 
             _layout.Children.Add(_backgroundBox);
-            _layout.Children.Add(_highlightBox);
-            _layout.Children.Add(_messageView);
+            _layout.Children.Add(_highlightBorder);
 
             Content = _layout;
 
@@ -87,36 +89,61 @@ namespace PayRemind.Pages.Custom
             var item = _showcaseItems[_currentIndex];
             var targetPosition = GetAbsolutePosition(item.TargetView);
 
-            System.Diagnostics.Debug.WriteLine($"Showing message: {item.Message}"); // Log para debug
+            System.Diagnostics.Debug.WriteLine($"Showing message: {item.Message}");
 
-            _messageView.Text = item.Message;
-            _messageView.IsVisible = true; // Asegurarse de que sea visible
+            _highlightBorder.Opacity = 0;
 
-            await Task.WhenAll(
-                _highlightBox.FadeTo(0, 150),
-                _messageView.FadeTo(0, 150)
-            );
+            double padding = 8; // Padding around the target view
+            AbsoluteLayout.SetLayoutBounds(_highlightBorder, new Rect(
+                targetPosition.X - padding,
+                targetPosition.Y - padding,
+                item.TargetView.Width + (padding * 2),
+                item.TargetView.Height + (padding * 2)));
 
-            AbsoluteLayout.SetLayoutBounds(_highlightBox, new Rect(targetPosition.X, targetPosition.Y, item.TargetView.Width, item.TargetView.Height));
-            _highlightBox.CornerRadius = (float)Math.Min(item.TargetView.Width, item.TargetView.Height) / 2;
+            await AnimateOpacity(_highlightBorder, 0, 1, 300);
 
-            // Posicionar el mensaje
-            double messageY = targetPosition.Y + item.TargetView.Height + 10;
-            if (messageY + 50 > this.Height) // Si el mensaje se sale de la pantalla
-            {
-                messageY = targetPosition.Y - 60; // Colocar el mensaje arriba del elemento
-            }
+            ISnackbar snackbar = Snackbar.Make(item.Message,
+                        action: async () =>
+                        {
+                            if (_currentIndex < _showcaseItems.Count - 1)
+                            {
+                                _currentIndex++;
+                                await ShowCurrentItem();
+                            }
+                            else
+                            {
+                                Dismiss();
+                            }
 
-            AbsoluteLayout.SetLayoutBounds(_messageView, new Rect(10, messageY, this.Width - 20, AbsoluteLayout.AutoSize));
-            AbsoluteLayout.SetLayoutFlags(_messageView, AbsoluteLayoutFlags.WidthProportional);
+                            // Acción a realizar cuando se presiona el botón OK
+                            System.Diagnostics.Debug.WriteLine("Botón OK presionado");
+                        },
+                        actionButtonText: "OK",
+                        duration: TimeSpan.FromSeconds(60), // Duración larga para que no se cierre automáticamente
+                        visualOptions: new SnackbarOptions
+                        {
+                            BackgroundColor = Colors.DarkSalmon,
+                            TextColor = Colors.White,
+                            ActionButtonTextColor = Colors.White
+                        });
 
-            await Task.WhenAll(
-                _highlightBox.FadeTo(1, 300),
-                _messageView.FadeTo(1, 300)
-            );
 
-            System.Diagnostics.Debug.WriteLine($"Message view bounds: {AbsoluteLayout.GetLayoutBounds(_messageView)}"); // Log para debug
+            await snackbar.Show();
         }
+
+        private async Task AnimateOpacity(VisualElement view, double start, double end, uint length)
+        {
+            uint steps = 30;
+            double stepValue = (end - start) / steps;
+            uint delay = length / steps;
+
+            for (int i = 0; i <= steps; i++)
+            {
+                view.Opacity = start + (stepValue * i);
+                await Task.Delay((int)delay);
+            }
+        }
+
         public void Dismiss()
         {
             this.IsVisible = false;

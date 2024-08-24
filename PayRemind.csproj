@@ -40,6 +40,7 @@
 
     <PropertyGroup>
       <AndroidSigningKeyStore>Payremind.keystore</AndroidSigningKeyStore>
+      <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
@@ -49,6 +50,8 @@
       <AndroidSigningKeyAlias>payremind</AndroidSigningKeyAlias>
       <AndroidSigningKeyPass>Payremind</AndroidSigningKeyPass>
       <AndroidCreatePackagePerAbi>True</AndroidCreatePackagePerAbi>
+      <ApplicationDisplayVersion>2</ApplicationDisplayVersion>
+      <ApplicationVersion>2</ApplicationVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-maccatalyst|AnyCPU'">
@@ -72,6 +75,10 @@
       <AndroidCreatePackagePerAbi>True</AndroidCreatePackagePerAbi>
       <AndroidPackageFormat>apk</AndroidPackageFormat>
       <AndroidLinkTool>r8</AndroidLinkTool>
+      <Optimize>False</Optimize>
+      <ApplicationDisplayVersion>2</ApplicationDisplayVersion>
+      <ApplicationVersion>2</ApplicationVersion>
+      <PublishTrimmed>True</PublishTrimmed>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-maccatalyst|AnyCPU'">
@@ -137,6 +144,7 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
         <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.80" />
         <PackageReference Include="MudBlazor" Version="7.6.0" />
+        <PackageReference Include="Sentry.Maui" Version="4.10.2" />
         <PackageReference Include="Shiny.Core" Version="3.3.3" />
         <PackageReference Include="Shiny.Hosting.Maui" Version="3.3.3" />
         <PackageReference Include="Shiny.Jobs" Version="3.3.3" />
@@ -160,7 +168,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ShowCaseBinding\ShowCaseBinding.csproj" />
+      <ProjectReference Include="..\ShowCaseViewBinding\ShowCaseViewBinding.csproj" />
     </ItemGroup>
 
     <ItemGroup>

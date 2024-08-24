@@ -24,6 +24,11 @@ namespace PayRemind
             var builder = MauiApp.CreateBuilder();
             builder.UseMauiApp<App>()
                 .UseShiny()
+                .UseSentry(options => {
+                    options.Dsn = "https://d1a711d4880a4dfab51453a6e0c83728@o4507708174958592.ingest.us.sentry.io/4507832608882688";
+                    options.Debug = true;
+                    options.TracesSampleRate = 1.0;
+                })
                 .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -38,7 +43,14 @@ namespace PayRemind
 
             //builder.Services.AddNotifications();
 
-            builder.Services.AddJob(typeof(MyBackgroundJob));
+            //builder.Services.AddJob(typeof(MyBackgroundJob), 
+            //    requiredNetwork: Shiny.Jobs.InternetAccess.None,
+            //    runInForeground: true, identifier: "notifications"
+            //    );
+
+
+            builder.Services.AddJob(typeof(MyBackgroundJob), 
+                identifier: "notifications", requiredNetwork: Shiny.Jobs.InternetAccess.None, runInForeground: true);
 
 
 #if ANDROID

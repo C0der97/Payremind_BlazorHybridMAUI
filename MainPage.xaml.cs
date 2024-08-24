@@ -5,11 +5,13 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.JSInterop;
 using PayRemind.Contracts;
 using PayRemind.Data;
+using PayRemind.Jobs.MyJob;
 using PayRemind.MauiWrapper;
 
 //using PayRemind.Jobs.MyJob;
 using PayRemind.Messages;
 using PayRemind.Pages;
+using Shiny;
 using Shiny.Jobs;
 //using Shiny.Notifications;
 using Application = Microsoft.Maui.Controls.Application;
@@ -27,8 +29,6 @@ namespace PayRemind
         private bool _isInitialized = false;
 
 
-        private CustomTooltip? _myTooltip;
-
 
 
         public MainPage( IJobManager jobManager)
@@ -36,15 +36,7 @@ namespace PayRemind
             InitializeComponent();
 
 
-            _myTooltip = new CustomTooltip
-            {
-                Title = "Presiona este botón para crear un recordatorio",
-                Text = "Este botón abrira un formulario",
-                IsVisible = true,
-            };
-
-    
-
+            _jobManager = jobManager;
 
             if (currentTheme == AppTheme.Light)
             {
@@ -179,7 +171,6 @@ namespace PayRemind
 
 
 
-            FabButton.SizeChanged += OnButtonSizeChanged;
 
 
 
@@ -209,24 +200,80 @@ namespace PayRemind
             }
 
 
-#if ANDROID
-            if (OperatingSystem.IsAndroidVersionAtLeast(31)) // Android 12 y superior
+            //#if ANDROID
+            //            if (OperatingSystem.IsAndroidVersionAtLeast(31)) // Android 12 y superior
+            //            {
+            //                var context = Android.App.Application.Context;
+            //                var alarmManager = context.GetSystemService(Context.AlarmService) as AlarmManager;
+            //                if (alarmManager != null && !alarmManager.CanScheduleExactAlarms())
+            //                {
+            //                    // Necesitamos solicitar permiso al usuario
+            //                    var intent = new Intent(Android.Provider.Settings.ActionRequestScheduleExactAlarm);
+            //                    intent.AddFlags(ActivityFlags.NewTask);
+            //                    context.StartActivity(intent);
+            //                    return;
+            //                }
+            //            }
+
+
+
+            //#endif
+
+
+
+            Dispatcher.Dispatch(async () =>
             {
-                var context = Android.App.Application.Context;
-                var alarmManager = context.GetSystemService(Context.AlarmService) as AlarmManager;
-                if (alarmManager != null && !alarmManager.CanScheduleExactAlarms())
+
+               await Task.Delay(5000);
+
+                await Permissions.RequestAsync<Permissions.Reminders>();
+                await Permissions.RequestAsync<Permissions.Battery>();
+                await Permissions.RequestAsync<Permissions.PostNotifications>();
+                await Permissions.RequestAsync<Permissions.Camera>();
+                await Permissions.RequestAsync<Permissions.Flashlight>();
+
+#if ANDROID
+                Android.App.Activity? context = Platform.CurrentActivity;
+                string? packageName = context?.PackageName ?? "";
+
+                if (context?.GetSystemService(Context.PowerService) is PowerManager powerManager && !powerManager.IsIgnoringBatteryOptimizations(packageName))
                 {
-                    // Necesitamos solicitar permiso al usuario
-                    var intent = new Intent(Android.Provider.Settings.ActionRequestScheduleExactAlarm);
-                    intent.AddFlags(ActivityFlags.NewTask);
-                    context.StartActivity(intent);
-                    return;
+                    var intent = new Intent();
+                    intent?.SetAction(Android.Provider.Settings.ActionRequestIgnoreBatteryOptimizations);
+                    intent?.SetData(Android.Net.Uri.Parse($"package:{packageName}"));
+                    context?.StartActivity(intent);
                 }
-            }
+
+
+                if (OperatingSystem.IsAndroidVersionAtLeast(31)) // Android 12 y superior
+                {
+                    if (context?.GetSystemService(Context.AlarmService) is AlarmManager alarmManager && !alarmManager.CanScheduleExactAlarms())
+                    {
+                        // Necesitamos solicitar permiso al usuario
+                        var intent = new Intent(Android.Provider.Settings.ActionRequestScheduleExactAlarm);
+                        intent.AddFlags(ActivityFlags.NewTask);
+                        context?.StartActivity(intent);
+                        await DisplayAlert("Permiso requerido", "Por favor, otorga permiso para programar alarmas exactas en la siguiente pantalla.", "OK");
+                        return;
+                    }
+                }
+
 
 
 
 #endif
+
+            });
+
+
+            
+
+
+
+            //FabButton.SizeChanged += OnButtonSizeChanged;
+
+
+
         }
 
 
@@ -253,6 +300,9 @@ namespace PayRemind
 
         private async Task ShowFeatureHighlight(Button btn = null)
         {
+
+            App.TutorialDone = true;
+
             // Asegúrate de que estás ejecutando esto en el hilo de la UI
 
             // Necesitamos la vista de Android para pasársela al servicio
@@ -316,7 +366,7 @@ namespace PayRemind
         }
 
 
-        private void FabButton_Clicked(object sender, EventArgs e)
+        private async void FabButton_Clicked(object sender, EventArgs e)
         {
             //Dispatcher.Dispatch(async () =>
             //{
@@ -324,7 +374,76 @@ namespace PayRemind
             //});
 
 
-            WeakReferenceMessenger.Default.Send(new OpenDialog(true));
+            if (!App.TutorialDone)
+            {
+                //await ShowFeatureHighlight();
+
+
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+
+                    AccessState accessState = await _jobManager.RequestAccess();
+                    if (accessState != AccessState.Available)
+                    {
+
+                        await DisplayAlert("Alerta", "No se tienen los permisos necesarios para ejecutar jobs en segundo plano.", "OK");
+
+
+                        return;
+                    }
+
+
+                    var jobInfo = new JobInfo(
+                                             JobType: typeof(MyBackgroundJob),
+                                             Identifier: "notificationsTwo",  // Identificador único para el job
+                                             RequiredInternetAccess: InternetAccess.None,  // Acceso a internet requerido
+                                             BatteryNotLow: false,                  // Ejecutar incluso con batería baja
+                                             DeviceCharging: false,                 // Ejecutar incluso si no está cargando
+                                             RunOnForeground: true                  // Ejecutar en primer plano,
+                                             , IsSystemJob: false
+                                         );
+
+                    try
+                    {
+                        _jobManager.Cancel("notificationsTwo");
+
+
+                        _jobManager.Register(jobInfo);
+
+                        var results = await _jobManager.RunAll();
+                        foreach (var result in results)
+                        {
+                            Console.WriteLine($"Job {result.Job?.Identifier} ejecutado. Éxito: {result.Success}");
+                        }
+
+                        await DisplayAlert("Éxito", "Job programado correctamente", "OK");
+
+                        App.TutorialDone = true;
+
+                    }
+                    catch (Exception ex)
+                    {
+                        await DisplayAlert("Error", $"No se pudo programar el job: {ex.Message}", "OK");
+                        App.TutorialDone = true;
+                    }
+
+                });
+
+
+            }
+            else
+            {
+
+                WeakReferenceMessenger.Default.Send(new OpenDialog(true));
+
+
+        
+
+
+            }
+
+
+
         }
 
         private void RequestBatteryOptimizationExemption()

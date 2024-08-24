@@ -10,12 +10,11 @@ namespace PayRemind.Jobs.MyJob
     {
         public async Task Run(Shiny.Jobs.JobInfo jobInfo, CancellationToken cancelToken)
         {
-              // Aquí va la lógica de tu tarea en segundo plano
             while (!cancelToken.IsCancellationRequested)
             {
                 // Ejemplo: registrar la hora actual cada 5 minutos
                 Console.WriteLine($"Tarea en segundo plano ejecutada a las {DateTime.Now}");
-                await Task.Delay(TimeSpan.FromMinutes(5), cancelToken);
+                await Task.Delay(TimeSpan.FromMinutes(15), cancelToken);
             }
         }
     }

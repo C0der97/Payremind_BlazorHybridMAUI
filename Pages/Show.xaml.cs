@@ -5,49 +5,52 @@ namespace PayRemind.Pages;
 
 public partial class Show : ContentPage
 {
-	public Show()
-	{
-		InitializeComponent();
+    private ShowcaseView _showcaseView;
 
-  
+    public Show()
+    {
+        InitializeComponent();
     }
 
-    protected override async void OnAppearing()
+    protected override void OnAppearing()
     {
         base.OnAppearing();
 
-
-        Button1.Loaded += (s, e) =>
+        if (_showcaseView == null)
         {
+            InitializeShowcase();
+        }
+    }
 
-            var showcase1 = new ShowcaseView(Button1, "Este es el primer botón");
-            var showcase2 = new ShowcaseView(Button2, "Este es el segundo botón");
+    private void InitializeShowcase()
+    {
+        _showcaseView = new ShowcaseView();
+        _showcaseView.AddShowcaseItem(Button1, "Este es el primer botón");
+        _showcaseView.AddShowcaseItem(Button2, "Este es el segundo botón");
 
-            //var sequence = new ShowcaseSequence();
-            //sequence.AddShowcase(showcase1)
-            //        .AddShowcase(showcase2)
-            //.Start();
-
-            showcase1.Show();
-
-            //var sequence = new ShowcaseSequence();
-            //sequence.AddShowcase(showcase1)
-            //.Start();
-
-            showcase1.Dismissed += (s, args) =>
+        // Añadir ShowcaseView a la página
+        Content = new Grid
+        {
+            Children =
             {
-                // Acción después de que se cierre el ShowcaseView
-                DisplayAlert("Showcase", "El ShowcaseView se ha cerrado", "OK");
-            };
-
-            showcase2.Dismissed += (s, args) =>
-            {
-                // Acción después de que se cierre el ShowcaseView
-                DisplayAlert("Showcase", "El ShowcaseView se ha cerrado", "OK");
-            };
+                new VerticalStackLayout
+                {
+                    Children = { Button1, Button2 },
+                    VerticalOptions = LayoutOptions.Center
+                },
+                _showcaseView
+            }
         };
 
+        // Ocultar inicialmente el ShowcaseView
+        _showcaseView.IsVisible = false;
 
+        // Añadir un evento para mostrar el ShowcaseView
+        Button1.Clicked += OnShowShowcase;
+    }
 
+    private async void OnShowShowcase(object sender, EventArgs e)
+    {
+        await _showcaseView.Show();
     }
 }

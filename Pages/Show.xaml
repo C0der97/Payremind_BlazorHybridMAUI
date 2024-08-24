@@ -3,17 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PayRemind.Pages.Show"
              Title="Show">
-    <VerticalStackLayout VerticalOptions="Center">
-
-        <Button x:Name="Button1" Text="Bton 1" Margin="6">
-            
-        </Button>
-
-
-        <Button x:Name="Button2" Text="Bton 2" Margin="6">
-
-        </Button>
-
-
-    </VerticalStackLayout>
+    <Grid>
+        <VerticalStackLayout VerticalOptions="Center">
+            <Button x:Name="Button1" Text="Bton 1" Margin="6" />
+            <Button x:Name="Button2" Text="Bton 2" Margin="6" />
+        </VerticalStackLayout>
+        <!-- El ShowcaseView se añadirá aquí programáticamente -->
+    </Grid>
 </ContentPage>

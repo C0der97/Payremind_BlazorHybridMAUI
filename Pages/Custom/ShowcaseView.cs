@@ -1,79 +1,133 @@
 ﻿using Microsoft.Maui.Layouts;
+using System.Collections.ObjectModel;
 
 namespace PayRemind.Pages.Custom
 {
     public class ShowcaseView : ContentView
     {
-        public View TargetView { get; set; }
-        public string Message { get; set; }
-        public Color HighlightColor { get; set; } = Colors.Yellow;
+        private AbsoluteLayout _layout;
+        private BoxView _backgroundBox;
+        private BoxView _highlightBox;
+        private Label _messageLabel;
+        private ObservableCollection<ShowcaseItem> _showcaseItems;
+        private int _currentIndex = 0;
 
         public event EventHandler Dismissed;
 
-        public ShowcaseView(View targetView, string message)
+        public ShowcaseView()
         {
-            TargetView = targetView;
-            Message = message;
-
-            // Configuración de la vista
+            _showcaseItems = new ObservableCollection<ShowcaseItem>();
             SetupShowcase();
+        }
 
-            // Añadir un gesto de toque para cerrar
-            var tapGesture = new TapGestureRecognizer();
-            tapGesture.Tapped += (s, e) => Dismiss();
-            this.GestureRecognizers.Add(tapGesture);
+        public void AddShowcaseItem(View targetView, string message)
+        {
+            _showcaseItems.Add(new ShowcaseItem(targetView, message));
         }
 
         private void SetupShowcase()
         {
-            var layout = new AbsoluteLayout();
+            _layout = new AbsoluteLayout();
 
-            // Obtener las coordenadas absolutas del TargetView
-            var targetPosition = GetAbsolutePosition(TargetView);
-
-            // Crear el fondo transparente
-            var backgroundBox = new BoxView
+            _backgroundBox = new BoxView
             {
-                Color = Colors.Transparent, // Fondo semi-transparente
-                WidthRequest = Application.Current.MainPage.Width,
-                HeightRequest = Application.Current.MainPage.Height
+                Color = Colors.Black.WithAlpha(0.1f),
+                InputTransparent = true
             };
-            AbsoluteLayout.SetLayoutBounds(backgroundBox, new Rect(0, 0, 1, 1));
-            AbsoluteLayout.SetLayoutFlags(backgroundBox, AbsoluteLayoutFlags.All);
+            AbsoluteLayout.SetLayoutBounds(_backgroundBox, new Rect(0, 0, 1, 1));
+            AbsoluteLayout.SetLayoutFlags(_backgroundBox, AbsoluteLayoutFlags.All);
 
-            // Crear el BoxView para resaltar el TargetView
-            var highlightBox = new BoxView
+            _highlightBox = new BoxView
             {
-                Color = HighlightColor,
-                CornerRadius = (float)TargetView.Width / 2,
-                WidthRequest = TargetView.Width,
-                HeightRequest = TargetView.Height,
-                Opacity = 0.3
+                Color = Colors.Yellow.WithAlpha(0.4f),
+                InputTransparent = true
             };
-            AbsoluteLayout.SetLayoutBounds(highlightBox, new Rect(targetPosition.X, targetPosition.Y, TargetView.Width, TargetView.Height));
-            AbsoluteLayout.SetLayoutFlags(highlightBox, AbsoluteLayoutFlags.None);
 
-            // Crear el Label para mostrar el mensaje
-            var messageLabel = new Label
+            _messageLabel = new Label
             {
-                Text = Message,
                 TextColor = Colors.White,
                 BackgroundColor = Colors.Black,
                 Padding = new Thickness(10),
-                WidthRequest = 200,
                 HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.End
+                VerticalOptions = LayoutOptions.Center,
+                FontSize = 18,
+                FontAttributes = FontAttributes.Bold
             };
-            AbsoluteLayout.SetLayoutBounds(messageLabel, new Rect(targetPosition.X + 10, targetPosition.Y + TargetView.Height + 20, 200, 50));
-            AbsoluteLayout.SetLayoutFlags(messageLabel, AbsoluteLayoutFlags.None);
 
-            // Añadir los elementos al AbsoluteLayout
-            layout.Children.Add(backgroundBox);
-            layout.Children.Add(highlightBox);
-            layout.Children.Add(messageLabel);
+            _layout.Children.Add(_backgroundBox);
+            _layout.Children.Add(_highlightBox);
+            _layout.Children.Add(_messageLabel);
 
-            // Asignar el layout al Content de la ContentView
-            this.Content = layout;
+            Content = _layout;
+
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += OnTapped;
+            _layout.GestureRecognizers.Add(tapGesture);
+        }
+
+        private async void OnTapped(object sender, EventArgs e)
+        {
+            if (_currentIndex < _showcaseItems.Count - 1)
+            {
+                _currentIndex++;
+                await ShowCurrentItem();
+            }
+            else
+            {
+                Dismiss();
+            }
+        }
+
+        public async Task Show()
+        {
+            if (_showcaseItems.Count == 0) return;
+
+            this.IsVisible = true;
+            _currentIndex = 0;
+            await ShowCurrentItem();
+        }
+
+        private async Task ShowCurrentItem()
+        {
+            var item = _showcaseItems[_currentIndex];
+            var targetPosition = GetAbsolutePosition(item.TargetView);
+
+            _messageLabel.Text = item.Message;
+
+            await Task.WhenAll(
+                _highlightBox.FadeTo(0, 150),
+                _messageLabel.FadeTo(0, 150)
+            );
+
+            AbsoluteLayout.SetLayoutBounds(_highlightBox, new Rect(targetPosition.X, targetPosition.Y, item.TargetView.Width, item.TargetView.Height));
+            _highlightBox.CornerRadius = (float)Math.Min(item.TargetView.Width, item.TargetView.Height) / 2;
+
+            // Ajustar la posición del mensaje para que sea visible
+            double messageY = targetPosition.Y - 40; // Coloca el mensaje encima del botón
+            if (messageY < 0)
+            {
+                messageY = targetPosition.Y + item.TargetView.Height + 10; // Si no cabe arriba, colócalo debajo
+            }
+
+            AbsoluteLayout.SetLayoutBounds(_messageLabel, new Rect(10, messageY, this.Width - 20, AbsoluteLayout.AutoSize));
+            AbsoluteLayout.SetLayoutFlags(_messageLabel, AbsoluteLayoutFlags.WidthProportional);
+
+            // Asegúrate de que el mensaje tenga un fondo para mayor visibilidad
+            _messageLabel.BackgroundColor = Colors.Black.WithAlpha(0.7f);
+            _messageLabel.TextColor = Colors.White;
+            _messageLabel.FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label));
+            _messageLabel.HorizontalTextAlignment = TextAlignment.Center;
+            _messageLabel.Padding = new Thickness(10);
+
+            await Task.WhenAll(
+                _highlightBox.FadeTo(1, 300),
+                _messageLabel.FadeTo(1, 300)
+            );
+        }
+        public void Dismiss()
+        {
+            this.IsVisible = false;
+            Dismissed?.Invoke(this, EventArgs.Empty);
         }
 
         private Point GetAbsolutePosition(View view)
@@ -82,40 +136,33 @@ namespace PayRemind.Pages.Custom
             var x = element.X;
             var y = element.Y;
 
-            while (element.Parent is VisualElement parent)
+            while (element.Parent != null)
             {
-                x += parent.X;
-                y += parent.Y;
-
-                // Solo continuar si el padre puede ser convertido a View
-                if (parent is View parentView)
+                if (element.Parent is View parentView)
                 {
-                    element = parentView; // Usamos el cast seguro
+                    x += parentView.X;
+                    y += parentView.Y;
+                    element = parentView;
                 }
                 else
                 {
-                    break; // Si no es un View, salimos del bucle
+                    break;
                 }
             }
 
             return new Point(x, y);
         }
-
-
-        public void Show()
-        {
-            // Mostrar la vista
-            Application.Current.MainPage?.Navigation.PushModalAsync(new ContentPage { Content = this, BackgroundColor = Colors.Transparent });
-        }
-
-        public void Dismiss()
-        {
-            // Ocultar la vista
-            Application.Current.MainPage?.Navigation.PopModalAsync();
-
-            // Disparar el evento Dismissed cuando se oculta la vista
-            Dismissed?.Invoke(this, EventArgs.Empty);
-        }
     }
 
+    public class ShowcaseItem
+    {
+        public View TargetView { get; set; }
+        public string Message { get; set; }
+
+        public ShowcaseItem(View targetView, string message)
+        {
+            TargetView = targetView;
+            Message = message;
+        }
+    }
 }

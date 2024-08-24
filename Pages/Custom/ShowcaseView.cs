@@ -8,6 +8,7 @@ namespace PayRemind.Pages.Custom
         private AbsoluteLayout _layout;
         private BoxView _backgroundBox;
         private BoxView _highlightBox;
+        private CustomShowcaseMessage _messageView;
         private Label _messageLabel;
         private ObservableCollection<ShowcaseItem> _showcaseItems;
         private int _currentIndex = 0;
@@ -43,20 +44,14 @@ namespace PayRemind.Pages.Custom
                 InputTransparent = true
             };
 
-            _messageLabel = new Label
+            _messageView = new CustomShowcaseMessage
             {
-                TextColor = Colors.White,
-                BackgroundColor = Colors.Black,
-                Padding = new Thickness(10),
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center,
-                FontSize = 18,
-                FontAttributes = FontAttributes.Bold
+                IsVisible = true, // Asegurarse de que sea visible
             };
 
             _layout.Children.Add(_backgroundBox);
             _layout.Children.Add(_highlightBox);
-            _layout.Children.Add(_messageLabel);
+            _layout.Children.Add(_messageView);
 
             Content = _layout;
 
@@ -92,37 +87,35 @@ namespace PayRemind.Pages.Custom
             var item = _showcaseItems[_currentIndex];
             var targetPosition = GetAbsolutePosition(item.TargetView);
 
-            _messageLabel.Text = item.Message;
+            System.Diagnostics.Debug.WriteLine($"Showing message: {item.Message}"); // Log para debug
+
+            _messageView.Text = item.Message;
+            _messageView.IsVisible = true; // Asegurarse de que sea visible
 
             await Task.WhenAll(
                 _highlightBox.FadeTo(0, 150),
-                _messageLabel.FadeTo(0, 150)
+                _messageView.FadeTo(0, 150)
             );
 
             AbsoluteLayout.SetLayoutBounds(_highlightBox, new Rect(targetPosition.X, targetPosition.Y, item.TargetView.Width, item.TargetView.Height));
             _highlightBox.CornerRadius = (float)Math.Min(item.TargetView.Width, item.TargetView.Height) / 2;
 
-            // Ajustar la posición del mensaje para que sea visible
-            double messageY = targetPosition.Y - 40; // Coloca el mensaje encima del botón
-            if (messageY < 0)
+            // Posicionar el mensaje
+            double messageY = targetPosition.Y + item.TargetView.Height + 10;
+            if (messageY + 50 > this.Height) // Si el mensaje se sale de la pantalla
             {
-                messageY = targetPosition.Y + item.TargetView.Height + 10; // Si no cabe arriba, colócalo debajo
+                messageY = targetPosition.Y - 60; // Colocar el mensaje arriba del elemento
             }
 
-            AbsoluteLayout.SetLayoutBounds(_messageLabel, new Rect(10, messageY, this.Width - 20, AbsoluteLayout.AutoSize));
-            AbsoluteLayout.SetLayoutFlags(_messageLabel, AbsoluteLayoutFlags.WidthProportional);
-
-            // Asegúrate de que el mensaje tenga un fondo para mayor visibilidad
-            _messageLabel.BackgroundColor = Colors.Black.WithAlpha(0.7f);
-            _messageLabel.TextColor = Colors.White;
-            _messageLabel.FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label));
-            _messageLabel.HorizontalTextAlignment = TextAlignment.Center;
-            _messageLabel.Padding = new Thickness(10);
+            AbsoluteLayout.SetLayoutBounds(_messageView, new Rect(10, messageY, this.Width - 20, AbsoluteLayout.AutoSize));
+            AbsoluteLayout.SetLayoutFlags(_messageView, AbsoluteLayoutFlags.WidthProportional);
 
             await Task.WhenAll(
                 _highlightBox.FadeTo(1, 300),
-                _messageLabel.FadeTo(1, 300)
+                _messageView.FadeTo(1, 300)
             );
+
+            System.Diagnostics.Debug.WriteLine($"Message view bounds: {AbsoluteLayout.GetLayoutBounds(_messageView)}"); // Log para debug
         }
         public void Dismiss()
         {

@@ -14,7 +14,7 @@ namespace PayRemind.Platforms.Android
             AlarmManager? alarmManager = context.GetSystemService(Context.AlarmService) as AlarmManager;
 
             // Genera un ID único para cada alarma
-            int uniqueId = (int)(DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond);
+            int uniqueId = unchecked((int)DateTime.Now.Ticks);
 
             Intent intent = new(context, typeof(AlarmOwnReceiver));
             intent.PutExtra("name_reminder", name_reminder);

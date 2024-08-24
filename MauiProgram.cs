@@ -3,12 +3,15 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
 using MudBlazor.Services;
 using PayRemind.Contracts;
+using PayRemind.Jobs.MyJob;
+
 
 
 #if ANDROID
 using PayRemind.Platforms.Android;
 #endif
 using PayRemind.Shared;
+using Shiny;
 
 namespace PayRemind
 {
@@ -19,7 +22,9 @@ namespace PayRemind
             string dbPath = Path.Combine(FileSystem.AppDataDirectory, "notifications.db");
 
             var builder = MauiApp.CreateBuilder();
-            builder.UseMauiApp<App>().ConfigureFonts(fonts =>
+            builder.UseMauiApp<App>()
+                .UseShiny()
+                .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             }).UseMauiCommunityToolkit();
@@ -31,7 +36,14 @@ namespace PayRemind
             builder.Logging.AddDebug();
 #endif
 
+            builder.Services.AddNotifications();
+
+            builder.Services.AddJob(typeof(MyBackgroundJob));
+
+
 #if ANDROID
+
+
             builder.Services.AddSingleton<IViewConverterService, ViewConverterService>();
 
             DependencyService.Register<IViewConverterService, ViewConverterService>();

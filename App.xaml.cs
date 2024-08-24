@@ -1,15 +1,69 @@
-﻿namespace PayRemind
+﻿using Android.App;
+using Android.Content;
+using Android.OS;
+using CommunityToolkit.Maui.Alerts;
+using Shiny;
+using Shiny.Jobs;
+using Shiny.Notifications;
+using Application = Microsoft.Maui.Controls.Application;
+using Notification = Shiny.Notifications.Notification;
+
+namespace PayRemind
 {
     public partial class App : Application
     {
 
         public static bool AppActive = false;
 
-        public App()
+        public INotificationManager NotificationManager { get; set; }
+
+        public App(INotificationManager notificationManager, IJobManager jobManager)
         {
             InitializeComponent();
 
-            MainPage = new MainPage();
+            NotificationManager = notificationManager;
+
+
+            MainPage = new MainPage(notificationManager, jobManager);
+        }
+
+        protected override async void OnStart()
+        {
+            base.OnStart();
+
+
+
+            await Permissions.RequestAsync<Permissions.Reminders>();
+            await Permissions.RequestAsync<Permissions.Battery>();
+            await Permissions.RequestAsync<Permissions.PostNotifications>();
+            await Permissions.RequestAsync<Permissions.Camera>();
+            await Permissions.RequestAsync<Permissions.Flashlight>();
+
+
+            //AccessState response =  await NotificationManager.RequestAccess(AccessRequestFlags.Notification);
+
+            //if (response != AccessState.Available)
+            //{
+            //   await MainPage.DisplaySnackbar("No permisos", null, "OK");
+            //}
+            //else
+            //{
+            //    await MainPage.DisplaySnackbar("Si permisos", null, "OK");
+            //}
+
+#if ANDROID
+            Android.App.Activity? context = Platform.CurrentActivity;
+                        string? packageName = context?.PackageName ?? "";
+                        PowerManager? powerManager = context?.GetSystemService(Context.PowerService) as PowerManager;
+
+                        if (powerManager != null && !powerManager.IsIgnoringBatteryOptimizations(packageName))
+                        {
+                            var intent = new Intent();
+                            intent?.SetAction(Android.Provider.Settings.ActionRequestIgnoreBatteryOptimizations);
+                            intent?.SetData(Android.Net.Uri.Parse($"package:{packageName}"));
+                            context?.StartActivity(intent);
+                        }
+            #endif
         }
 
         //        protected override Window CreateWindow(IActivationState activationState)

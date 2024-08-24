@@ -27,8 +27,8 @@
         <ApplicationId>com.retrocode.payremind</ApplicationId>
 
         <!-- Versions -->
-        <ApplicationDisplayVersion>1.6</ApplicationDisplayVersion>
-        <ApplicationVersion>1.6</ApplicationVersion>
+        <ApplicationDisplayVersion>1.8</ApplicationDisplayVersion>
+        <ApplicationVersion>1.8</ApplicationVersion>
 
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
@@ -129,7 +129,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Maui" Version="9.0.2" />
+        <PackageReference Include="CommunityToolkit.Maui" Version="9.0.3" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
         <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.80" />
         <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.80" />
@@ -137,6 +137,10 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
         <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.80" />
         <PackageReference Include="MudBlazor" Version="7.6.0" />
+        <PackageReference Include="Shiny.Core" Version="3.3.3" />
+        <PackageReference Include="Shiny.Hosting.Maui" Version="3.3.3" />
+        <PackageReference Include="Shiny.Jobs" Version="3.3.3" />
+        <PackageReference Include="Shiny.Notifications" Version="3.3.3" />
         <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 		
     </ItemGroup>

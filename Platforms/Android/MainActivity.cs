@@ -10,12 +10,20 @@ namespace PayRemind
 {
     [Activity(Theme = "@style/Maui.SplashTheme", 
         MainLauncher = true,
-        Exported = true,
-        LaunchMode = LaunchMode.SingleTask,
+        LaunchMode = LaunchMode.SingleTop,
         ConfigurationChanges = ConfigChanges.ScreenSize | 
         ConfigChanges.Orientation | ConfigChanges.UiMode | 
         ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | 
         ConfigChanges.Density)]
+
+    [IntentFilter(
+      new[] {
+            Shiny.ShinyNotificationIntents.NotificationClickAction
+                  },
+                  Categories = new[] {
+                      "android.intent.category.DEFAULT"
+                  }
+  )]
     public class MainActivity : MauiAppCompatActivity
     {
         public static MainActivity? ActivityCurrent { get; set; }
@@ -31,8 +39,24 @@ namespace PayRemind
 
             App.AppActive = true;
 
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
+            {
+                var channelId = "alarms_default";
+                var channelName = "alarms_default";
+                var channelDescription = "Canal de notificaciones predeterminado";
+                var importance = NotificationImportance.Default;
 
-         
+                NotificationChannel channel = new(channelId, channelName, importance)
+                {
+                    Description = channelDescription
+                };
+
+                NotificationManager? notificationManager = GetSystemService(NotificationService) as NotificationManager;
+                notificationManager?.CreateNotificationChannel(channel);
+            }
+
+
+
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent?

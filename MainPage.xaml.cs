@@ -1,9 +1,15 @@
-﻿using Android.Content;
+﻿using Android.App;
+using Android.Content;
 using Android.OS;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.JSInterop;
 using PayRemind.Data;
+using PayRemind.Jobs.MyJob;
 using PayRemind.Messages;
+using Shiny.Jobs;
+using Shiny.Notifications;
+using Application = Microsoft.Maui.Controls.Application;
+using Notification = Shiny.Notifications.Notification;
 
 namespace PayRemind
 {
@@ -12,12 +18,21 @@ namespace PayRemind
         private readonly AppTheme currentTheme = Application.Current == null ? AppTheme.Dark : Application.Current.RequestedTheme;
 
 
+        private readonly IJobManager _jobManager;
+
         private bool _isInitialized = false;
 
+        private readonly INotificationManager _notificationManager;
 
-        public MainPage()
+
+        public MainPage(INotificationManager notificationManager, IJobManager jobManager)
         {
             InitializeComponent();
+
+            _notificationManager = notificationManager;
+
+
+
 
 
             if (currentTheme == AppTheme.Light)
@@ -150,45 +165,92 @@ namespace PayRemind
         protected override void OnAppearing()
         {
             base.OnAppearing();
+
+
+            Channel channel = new Channel
+            {
+                Identifier = "alarms_notif",
+                Description = "Channel",
+                Importance = ChannelImportance.High,
+                Actions = new List<ChannelAction>()
+                {
+                    new ChannelAction()
+                    {
+                        Identifier = "alarm_btn",
+                        Title = "action_alarm",
+                        ActionType = ChannelActionType.OpenApp
+                    }
+                }
+            };
+
+
+            _notificationManager.AddChannel(channel);
+
             if (!_isInitialized)
             {
                 _isInitialized = true;
                 Initialize();
             }
+
+
+#if ANDROID
+            if (OperatingSystem.IsAndroidVersionAtLeast(31)) // Android 12 y superior
+            {
+                var context = Android.App.Application.Context;
+                var alarmManager = context.GetSystemService(Context.AlarmService) as AlarmManager;
+                if (alarmManager != null && !alarmManager.CanScheduleExactAlarms())
+                {
+                    // Necesitamos solicitar permiso al usuario
+                    var intent = new Intent(Android.Provider.Settings.ActionRequestScheduleExactAlarm);
+                    intent.AddFlags(ActivityFlags.NewTask);
+                    context.StartActivity(intent);
+                    return;
+                }
+            }
+
+
+
+#endif
         }
 
 
         private void Initialize()
         {
-            try
-            {
-                Dispatcher.Dispatch(async () =>
-                {
-                    //if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
-                    //{
-                    //    await LocalNotificationCenter.Current.RequestNotificationPermission();
-                    //}
+            //try
+            //{
+            //    Dispatcher.Dispatch(async () =>
+            //    {
+            //        //if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
+            //        //{
+            //        //    await LocalNotificationCenter.Current.RequestNotificationPermission();
+            //        //}
 
-                    await Permissions.RequestAsync<Permissions.Reminders>();
-                    await Permissions.RequestAsync<Permissions.Battery>();
-                    await Permissions.RequestAsync<Permissions.PostNotifications>();
+            //        await Permissions.RequestAsync<Permissions.Reminders>();
+            //        await Permissions.RequestAsync<Permissions.Battery>();
+            //        await Permissions.RequestAsync<Permissions.PostNotifications>();
 
 
-                    if (DeviceInfo.Platform == DevicePlatform.Android)
-                    {
-                        RequestBatteryOptimizationExemption();
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
+            //        if (DeviceInfo.Platform == DevicePlatform.Android)
+            //        {
+            //            RequestBatteryOptimizationExemption();
+            //        }
+            //    });
+            //}
+            //catch (Exception ex)
+            //{
 
-            }
+            //}
         }
 
 
         private void FabButton_Clicked(object sender, EventArgs e)
         {
+            //Dispatcher.Dispatch(async () =>
+            //{
+            //    await OnSendNotificationClicked();
+            //});
+
+
             WeakReferenceMessenger.Default.Send(new OpenDialog(true));
         }
 
@@ -209,6 +271,52 @@ namespace PayRemind
             }
 #endif
 
+
+        }
+
+
+        private async Task OnSendNotificationClicked()
+        {
+            Shiny.AccessState result = await _notificationManager.RequestAccess(AccessRequestFlags.Notification);
+
+
+
+
+            //JobInfo job = new JobInfo(
+            //    "Notifications",
+            //    typeof(MyBackgroundJob),
+            //    BatteryNotLow: true,
+            //    DeviceCharging: true,
+            //    RunOnForeground: true,
+            //    RequiredInternetAccess:InternetAccess.None
+            //);
+
+            //this._jobManager.Register(job);
+
+
+            // Informar al usuario
+            //await DisplayAlert("Información", "Trabajo en segundo plano iniciado", "OK");
+
+            int uniId = unchecked((int)DateTime.Now.Ticks);
+
+            Notification notification = new()
+            {
+                Channel = "alarms_notif",
+                Id = unchecked((int)DateTime.Now.Ticks),
+                Title = "Título de la notificación",
+                Message = "Este es el cuerpo de la notificación",
+                BadgeCount = 0,
+                Thread = "Group",
+                ScheduleDate = DateTime.Now.AddSeconds(2)
+            };
+
+
+              await _notificationManager.Send(notification);
+
+            Task<IList<Notification>> nots = _notificationManager.GetPendingNotifications();
+
+
+            var not =  await _notificationManager.GetNotification(uniId);
 
         }
     }

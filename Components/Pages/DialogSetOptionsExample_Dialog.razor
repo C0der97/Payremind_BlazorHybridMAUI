@@ -101,23 +101,6 @@
         try
         {
 
-#if ANDROID
-    if (OperatingSystem.IsAndroidVersionAtLeast(31)) // Android 12 y superior
-    {
-        var context = Android.App.Application.Context;
-        var alarmManager = context.GetSystemService(Context.AlarmService) as AlarmManager;
-        if (alarmManager != null && !alarmManager.CanScheduleExactAlarms())
-        {
-            // Necesitamos solicitar permiso al usuario
-            var intent = new Intent(Android.Provider.Settings.ActionRequestScheduleExactAlarm);
-            intent.AddFlags(ActivityFlags.NewTask);
-            context.StartActivity(intent);
-            return;
-        }
-    }
-#endif
-
-
             if (selectedDate == string.Empty || SelectedTime == string.Empty)
             {
                 Snackbar.Add("Complete el formulario", Severity.Warning, config => { 
@@ -140,20 +123,23 @@
 
             IAlarmService _alarmService = DependencyService.Get<IAlarmService>();
 
+            Snackbar.Add("Alarma programada para "+notificationData.Name+" , "+
+            notificationData.DateTime.ToShortTimeString()+" "+notificationData.Amount.ToString(), Severity.Info);
+
             _alarmService.SetAlarm(notificationData.DateTime, $"Por Monto de: ${notificationData.Amount:F2}", notificationData.Name);
 
-            var googleCalendarUrl = GenerateGoogleCalendarUrl(notificationData);
+            // var googleCalendarUrl = GenerateGoogleCalendarUrl(notificationData);
 
-            try
-            {
-                await Launcher.OpenAsync(googleCalendarUrl);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al abrir la URL: {ex.Message}");
-                // Puedes mostrar un mensaje al usuario si la URL no se puede abrir
-                Snackbar.Add("No se pudo abrir el calendario de Google", Severity.Warning);
-            }
+            // try
+            // {
+            //     await Launcher.OpenAsync(googleCalendarUrl);
+            // }
+            // catch (Exception ex)
+            // {
+            //     Console.WriteLine($"Error al abrir la URL: {ex.Message}");
+            //     // Puedes mostrar un mensaje al usuario si la URL no se puede abrir
+            //     Snackbar.Add("No se pudo abrir el calendario de Google", Severity.Warning);
+            // }
 
 
             // NotificationRequest notification = new NotificationRequest

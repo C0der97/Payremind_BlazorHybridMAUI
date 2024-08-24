@@ -5,14 +5,11 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.JSInterop;
 using PayRemind.Contracts;
 using PayRemind.Data;
-using PayRemind.Jobs.MyJob;
 using PayRemind.MauiWrapper;
 
 //using PayRemind.Jobs.MyJob;
 using PayRemind.Messages;
 using PayRemind.Pages;
-using Shiny;
-using Shiny.Jobs;
 //using Shiny.Notifications;
 using Application = Microsoft.Maui.Controls.Application;
 //using Notification = Shiny.Notifications.Notification;
@@ -24,19 +21,15 @@ namespace PayRemind
         private readonly AppTheme currentTheme = Application.Current == null ? AppTheme.Dark : Application.Current.RequestedTheme;
 
 
-        private readonly IJobManager _jobManager;
-
         private bool _isInitialized = false;
 
 
 
 
-        public MainPage( IJobManager jobManager)
+        public MainPage()
         {
             InitializeComponent();
 
-
-            _jobManager = jobManager;
 
             if (currentTheme == AppTheme.Light)
             {
@@ -231,6 +224,7 @@ namespace PayRemind
                 await Permissions.RequestAsync<Permissions.PostNotifications>();
                 await Permissions.RequestAsync<Permissions.Camera>();
                 await Permissions.RequestAsync<Permissions.Flashlight>();
+                await Permissions.RequestAsync<Permissions.LaunchApp>();
 
 #if ANDROID
                 Android.App.Activity? context = Platform.CurrentActivity;
@@ -374,67 +368,20 @@ namespace PayRemind
             //});
 
 
+            WeakReferenceMessenger.Default.Send(new OpenDialog(true));
+
+
             if (!App.TutorialDone)
             {
                 //await ShowFeatureHighlight();
 
 
-                MainThread.BeginInvokeOnMainThread(async () =>
-                {
-
-                    AccessState accessState = await _jobManager.RequestAccess();
-                    if (accessState != AccessState.Available)
-                    {
-
-                        await DisplayAlert("Alerta", "No se tienen los permisos necesarios para ejecutar jobs en segundo plano.", "OK");
-
-
-                        return;
-                    }
-
-
-                    var jobInfo = new JobInfo(
-                                             JobType: typeof(MyBackgroundJob),
-                                             Identifier: "notificationsTwo",  // Identificador único para el job
-                                             RequiredInternetAccess: InternetAccess.None,  // Acceso a internet requerido
-                                             BatteryNotLow: false,                  // Ejecutar incluso con batería baja
-                                             DeviceCharging: false,                 // Ejecutar incluso si no está cargando
-                                             RunOnForeground: true                  // Ejecutar en primer plano,
-                                             , IsSystemJob: false
-                                         );
-
-                    try
-                    {
-                        _jobManager.Cancel("notificationsTwo");
-
-
-                        _jobManager.Register(jobInfo);
-
-                        var results = await _jobManager.RunAll();
-                        foreach (var result in results)
-                        {
-                            Console.WriteLine($"Job {result.Job?.Identifier} ejecutado. Éxito: {result.Success}");
-                        }
-
-                        await DisplayAlert("Éxito", "Job programado correctamente", "OK");
-
-                        App.TutorialDone = true;
-
-                    }
-                    catch (Exception ex)
-                    {
-                        await DisplayAlert("Error", $"No se pudo programar el job: {ex.Message}", "OK");
-                        App.TutorialDone = true;
-                    }
-
-                });
-
+               
 
             }
             else
             {
 
-                WeakReferenceMessenger.Default.Send(new OpenDialog(true));
 
 
         

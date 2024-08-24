@@ -2,8 +2,8 @@
 using Android.Content;
 using Android.OS;
 using CommunityToolkit.Maui.Alerts;
-using Shiny;
-using Shiny.Jobs;
+using PayRemind.Contracts;
+
 //using Shiny.Notifications;
 using Application = Microsoft.Maui.Controls.Application;
 //using Notification = Shiny.Notifications.Notification;
@@ -19,23 +19,25 @@ namespace PayRemind
 
         //public INotificationManager NotificationManager { get; set; }
 
-        public App(/*INotificationManager notificationManager, */IJobManager jobManager)
+        public App(/*INotificationManager notificationManager, */)
         {
             InitializeComponent();
 
             //NotificationManager = notificationManager;
 
-
-            MainPage = new MainPage(jobManager);
+            MainPage = new MainPage();
         }
 
         protected override async void OnStart()
         {
             base.OnStart();
 
+            IForegroundService _foregroundService = DependencyService.Get<IForegroundService>();
+
+            _foregroundService.StartForegroundService();
 
 
-      
+
 
 
             //AccessState response =  await NotificationManager.RequestAccess(AccessRequestFlags.Notification);

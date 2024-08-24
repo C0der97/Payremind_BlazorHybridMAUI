@@ -3,15 +3,15 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
 using MudBlazor.Services;
 using PayRemind.Contracts;
-using PayRemind.Jobs.MyJob;
 
 
 
 #if ANDROID
 using PayRemind.Platforms.Android;
+using PayRemind.Platforms.Android.Services;
+
 #endif
 using PayRemind.Shared;
-using Shiny;
 
 namespace PayRemind
 {
@@ -23,7 +23,6 @@ namespace PayRemind
 
             var builder = MauiApp.CreateBuilder();
             builder.UseMauiApp<App>()
-                .UseShiny()
                 .UseSentry(options => {
                     options.Dsn = "https://d1a711d4880a4dfab51453a6e0c83728@o4507708174958592.ingest.us.sentry.io/4507832608882688";
                     options.Debug = true;
@@ -49,8 +48,6 @@ namespace PayRemind
             //    );
 
 
-            builder.Services.AddJob(typeof(MyBackgroundJob), 
-                identifier: "notifications", requiredNetwork: Shiny.Jobs.InternetAccess.None, runInForeground: true);
 
 
 #if ANDROID
@@ -60,8 +57,9 @@ namespace PayRemind
 
             DependencyService.Register<IViewConverterService, ViewConverterService>();
             DependencyService.Register<IAlarmService, AlarmManagerService>();
+            DependencyService.Register<IForegroundService, ForegroundServiceImplementation>();
 
-           // builder.Services.AddTransient<IAlarmService, AlarmManagerService>();
+            // builder.Services.AddTransient<IAlarmService, AlarmManagerService>();
 
 #endif
 

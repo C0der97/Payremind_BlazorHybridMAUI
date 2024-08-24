@@ -2,12 +2,13 @@
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+using PayRemind.Contracts;
 
 namespace PayRemind.Platforms.Android
 {
 
     [Service(ForegroundServiceType = ForegroundService.TypeSpecialUse)]
-    public class NotificationForegroundServiceOwn : Service
+    public class NotificationForegroundServiceOwn : Service, IForegroundService
     {
         private const int ServiceId = 1000;
         private const string ChannelId = "ForegroundServiceChannel";
@@ -29,13 +30,28 @@ namespace PayRemind.Platforms.Android
             return StartCommandResult.Sticky;
         }
 
+        public void StartForegroundService()
+        {
+
+            Context context = Platform.AppContext;
+
+            var intent = new Intent(context, typeof(NotificationForegroundServiceOwn));
+            context.StartForegroundService(intent);
+        }
+
+        public void StopForegroundService()
+        {
+            StopForeground(true);
+            StopSelf();
+        }
+
         private void CreateNotificationChannel()
         {
             if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
             {
                 var channel = new NotificationChannel(ChannelId, "Foreground Service Channel", NotificationImportance.Default);
-                var notificationManager = (NotificationManager)GetSystemService(NotificationService);
-                notificationManager.CreateNotificationChannel(channel);
+                NotificationManager? notificationManager = GetSystemService(NotificationService) as NotificationManager;
+                notificationManager?.CreateNotificationChannel(channel);
             }
         }
     }

@@ -28,10 +28,13 @@ namespace PayRemind.Pages.Custom
         {
             var layout = new AbsoluteLayout();
 
+            // Obtener las coordenadas absolutas del TargetView
+            var targetPosition = GetAbsolutePosition(TargetView);
+
             // Crear el fondo transparente
             var backgroundBox = new BoxView
             {
-                Color = Colors.Black.MultiplyAlpha(0.5f), // Fondo semi-transparente
+                Color = Colors.Transparent, // Fondo semi-transparente
                 WidthRequest = Application.Current.MainPage.Width,
                 HeightRequest = Application.Current.MainPage.Height
             };
@@ -47,7 +50,7 @@ namespace PayRemind.Pages.Custom
                 HeightRequest = TargetView.Height,
                 Opacity = 0.3
             };
-            AbsoluteLayout.SetLayoutBounds(highlightBox, new Rect(TargetView.X, TargetView.Y, TargetView.Width, TargetView.Height));
+            AbsoluteLayout.SetLayoutBounds(highlightBox, new Rect(targetPosition.X, targetPosition.Y, TargetView.Width, TargetView.Height));
             AbsoluteLayout.SetLayoutFlags(highlightBox, AbsoluteLayoutFlags.None);
 
             // Crear el Label para mostrar el mensaje
@@ -61,7 +64,7 @@ namespace PayRemind.Pages.Custom
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.End
             };
-            AbsoluteLayout.SetLayoutBounds(messageLabel, new Rect(TargetView.X + 10, TargetView.Y + TargetView.Height + 20, 200, 50));
+            AbsoluteLayout.SetLayoutBounds(messageLabel, new Rect(targetPosition.X + 10, targetPosition.Y + TargetView.Height + 20, 200, 50));
             AbsoluteLayout.SetLayoutFlags(messageLabel, AbsoluteLayoutFlags.None);
 
             // Añadir los elementos al AbsoluteLayout
@@ -72,6 +75,32 @@ namespace PayRemind.Pages.Custom
             // Asignar el layout al Content de la ContentView
             this.Content = layout;
         }
+
+        private Point GetAbsolutePosition(View view)
+        {
+            var element = view;
+            var x = element.X;
+            var y = element.Y;
+
+            while (element.Parent is VisualElement parent)
+            {
+                x += parent.X;
+                y += parent.Y;
+
+                // Solo continuar si el padre puede ser convertido a View
+                if (parent is View parentView)
+                {
+                    element = parentView; // Usamos el cast seguro
+                }
+                else
+                {
+                    break; // Si no es un View, salimos del bucle
+                }
+            }
+
+            return new Point(x, y);
+        }
+
 
         public void Show()
         {

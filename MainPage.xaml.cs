@@ -18,7 +18,7 @@ namespace PayRemind
 {
     public partial class MainPage : TabbedPage
     {
-        private readonly AppTheme currentTheme = Application.Current == null ? AppTheme.Dark : Application.Current.RequestedTheme;
+        //private readonly AppTheme currentTheme = Application.Current == null ? AppTheme.Dark : Application.Current.RequestedTheme;
 
 
         private bool _isInitialized = false;
@@ -31,30 +31,16 @@ namespace PayRemind
             InitializeComponent();
 
 
-            if (currentTheme == AppTheme.Light)
-            {
-                this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#ffffff"), Color.FromArgb("#ffffff"));
-            }
-            else
-            {
-                this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#32323d"), Color.FromArgb("#32323d"));
-            }
+            //if (currentTheme == AppTheme.Light)
+            //{
+            //    this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#ffffff"), Color.FromArgb("#ffffff"));
+            //}
+            //else
+            //{
+            //    this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#32323d"), Color.FromArgb("#32323d"));
+            //}
 
 
-            if (Application.Current != null)
-            {
-                Application.Current.RequestedThemeChanged += (s, a) =>
-                {
-                    if (a.RequestedTheme == AppTheme.Light)
-                    {
-                        this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#ffffff"), Color.FromArgb("#ffffff"));
-                    }
-                    else
-                    {
-                        this.SetAppThemeColor(NavigationPage.BarBackgroundProperty, Color.FromArgb("#32323d"), Color.FromArgb("#32323d"));
-                    }
-                };
-            }
 
             WeakReferenceMessenger.Default.Register<TabIndexMessage>(this, async (r, message) =>
             {
@@ -211,56 +197,6 @@ namespace PayRemind
 
 
             //#endif
-
-
-
-            Dispatcher.Dispatch(async () =>
-            {
-
-               await Task.Delay(5000);
-
-                await Permissions.RequestAsync<Permissions.Reminders>();
-                await Permissions.RequestAsync<Permissions.Battery>();
-                await Permissions.RequestAsync<Permissions.PostNotifications>();
-                await Permissions.RequestAsync<Permissions.Camera>();
-                await Permissions.RequestAsync<Permissions.Flashlight>();
-                await Permissions.RequestAsync<Permissions.LaunchApp>();
-
-#if ANDROID
-                Android.App.Activity? context = Platform.CurrentActivity;
-                string? packageName = context?.PackageName ?? "";
-
-                if (context?.GetSystemService(Context.PowerService) is PowerManager powerManager && !powerManager.IsIgnoringBatteryOptimizations(packageName))
-                {
-                    var intent = new Intent();
-                    intent?.SetAction(Android.Provider.Settings.ActionRequestIgnoreBatteryOptimizations);
-                    intent?.SetData(Android.Net.Uri.Parse($"package:{packageName}"));
-                    context?.StartActivity(intent);
-                }
-
-
-                if (OperatingSystem.IsAndroidVersionAtLeast(31)) // Android 12 y superior
-                {
-                    if (context?.GetSystemService(Context.AlarmService) is AlarmManager alarmManager && !alarmManager.CanScheduleExactAlarms())
-                    {
-                        // Necesitamos solicitar permiso al usuario
-                        var intent = new Intent(Android.Provider.Settings.ActionRequestScheduleExactAlarm);
-                        intent.AddFlags(ActivityFlags.NewTask);
-                        context?.StartActivity(intent);
-                        await DisplayAlert("Permiso requerido", "Por favor, otorga permiso para programar alarmas exactas en la siguiente pantalla.", "OK");
-                        return;
-                    }
-                }
-
-
-
-
-#endif
-
-            });
-
-
-            
 
 
 

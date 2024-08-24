@@ -50,23 +50,23 @@
 
 @code {
 
-    private AppTheme? currentTheme;
+    // private AppTheme? currentTheme;
 
-    public AppTheme? CurrentTheme
-    {
-        get
+    // public AppTheme? CurrentTheme
+    // {
+    //     get
 
-        {
+    //     {
 
-            if (Application.Current != null)
-            {
-                return Application.Current.RequestedTheme;
-            }
+    //         if (Application.Current != null)
+    //         {
+    //             return Application.Current.RequestedTheme;
+    //         }
 
-            return null;
-        }
-        set { currentTheme = Application.Current != null ? Application.Current.RequestedTheme : null; }
-    }
+    //         return null;
+    //     }
+    //     set { currentTheme = Application.Current != null ? Application.Current.RequestedTheme : null; }
+    // }
 
 
     private List<NotificationData> notifications = new();
@@ -79,7 +79,7 @@
     protected override async Task OnInitializedAsync()
     {
 
-        if (currentTheme == AppTheme.Light)
+        if (App.CurrentTheme == AppTheme.Light)
         {
             _isDarkMode = false;
         }

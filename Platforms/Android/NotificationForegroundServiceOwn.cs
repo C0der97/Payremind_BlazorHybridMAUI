@@ -7,13 +7,30 @@ using PayRemind.Contracts;
 namespace PayRemind.Platforms.Android
 {
 
-    [Service(ForegroundServiceType = ForegroundService.TypeSpecialUse)]
+    [Service(ForegroundServiceType = ForegroundService.TypeSpecialUse, 
+        Exported = true, 
+        Enabled = true)]
     public class NotificationForegroundServiceOwn : Service, IForegroundService
     {
         private const int ServiceId = 1000;
         private const string ChannelId = "ForegroundServiceChannel";
 
         public override IBinder OnBind(Intent intent) => null;
+
+
+        public override void OnCreate()
+        {
+            base.OnCreate();
+
+            CreateNotificationChannel();
+            var notification = new Notification.Builder(this, ChannelId)
+                .SetContentTitle("Recordatorios")
+                .SetContentText("Manteniendo App Viva")
+                .Build();
+
+            StartForeground(ServiceId, notification);
+        }
+
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
@@ -54,5 +71,16 @@ namespace PayRemind.Platforms.Android
                 notificationManager?.CreateNotificationChannel(channel);
             }
         }
+
+
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+            // Aquí puedes reactivar el servicio si se detiene
+            Intent broadcastIntent = new Intent(this, typeof(RestartServiceReceiver));
+            SendBroadcast(broadcastIntent);
+        }
+
+
     }
 }

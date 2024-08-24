@@ -21,15 +21,20 @@ namespace PayRemind
         public static readonly AppTheme CurrentTheme = Application.Current == null ? AppTheme.Dark : Application.Current.RequestedTheme;
 
 
+        public IForegroundService ServiceForeground { get; set; }
+
+
         //public INotificationManager NotificationManager { get; set; }
 
-        public App(/*INotificationManager notificationManager, */)
+        public App(/*INotificationManager notificationManager, */ IForegroundService serviceForeground)
         {
+
+            ServiceForeground = serviceForeground;
             InitializeComponent();
 
             //NotificationManager = notificationManager;
 
-            MainPage = new MainPage();
+            MainPage = new MainPage(serviceForeground);
         }
 
         protected override async void OnStart()
@@ -73,9 +78,9 @@ namespace PayRemind
                     }
                 }
 
-                IForegroundService _foregroundService = DependencyService.Get<IForegroundService>();
+                //IForegroundService _foregroundService = DependencyService.Get<IForegroundService>();
 
-                _foregroundService.StartForegroundService();
+                //_foregroundService.StartForegroundService();
 
 
 #endif
@@ -131,6 +136,20 @@ namespace PayRemind
             //}
         }
 
+
+        protected override void OnSleep()
+        {
+            ServiceForeground.StartForegroundService();
+            base.OnSleep();
+        }
+
+
+        protected override void OnResume()
+        {
+            ServiceForeground.StopForegroundService();
+            base.OnResume();
+        }
+
         //        protected override Window CreateWindow(IActivationState activationState)
         //        {
 
@@ -177,4 +196,6 @@ namespace PayRemind
         //    return new Window(mainPage);
         //}
     }
+
+   
 }

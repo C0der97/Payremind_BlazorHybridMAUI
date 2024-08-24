@@ -28,14 +28,14 @@ namespace PayRemind
 
         private ShowcaseView _showcaseView;
 
+        public IForegroundService ServiceForeground { get; set; }
 
 
-
-        public MainPage()
+        public MainPage(IForegroundService serviceForeground)
         {
             InitializeComponent();
 
-
+            ServiceForeground = serviceForeground;
 
             //if (currentTheme == AppTheme.Light)
             //{
@@ -185,8 +185,6 @@ namespace PayRemind
                 Initialize();
                 SetupShowcase();
             }
-
-
 
 
             FabButton.Loaded += OnFabButtonLoaded;

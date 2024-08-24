@@ -54,10 +54,11 @@ namespace PayRemind
 
 
             builder.Services.AddSingleton<IViewConverterService, ViewConverterService>();
+            builder.Services.AddSingleton<IForegroundService, NotificationForegroundServiceOwn>();
 
             DependencyService.Register<IViewConverterService, ViewConverterService>();
             DependencyService.Register<IAlarmService, AlarmManagerService>();
-            DependencyService.Register<IForegroundService, ForegroundServiceImplementation>();
+            //DependencyService.Register<IForegroundService, NotificationForegroundServiceOwn>();
 
             // builder.Services.AddTransient<IAlarmService, AlarmManagerService>();
 

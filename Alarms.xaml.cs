@@ -20,8 +20,7 @@ public partial class Alarms : ContentPage
         if (OperatingSystem.IsAndroidVersionAtLeast(31)) // Android 12 y superior
         {
             var context = Android.App.Application.Context;
-            var alarmManager = context.GetSystemService(Context.AlarmService) as AlarmManager;
-            if (alarmManager != null && !alarmManager.CanScheduleExactAlarms())
+            if (context.GetSystemService(Context.AlarmService) is AlarmManager alarmManager && !alarmManager.CanScheduleExactAlarms())
             {
                 // Necesitamos solicitar permiso al usuario
                 var intent = new Intent(Android.Provider.Settings.ActionRequestScheduleExactAlarm);
@@ -39,6 +38,6 @@ public partial class Alarms : ContentPage
 
         var alarmTime = DateTime.Now.AddMinutes(1); // Ejemplo: alarma en 5 minutos
         _alarmService.SetAlarm(alarmTime, "Em bimcho", "c");
-        DisplayAlert("Alarma configurada", $"La alarma se activará a las {alarmTime.ToString("HH:mm")}", "OK");
+        await DisplayAlert("Alarma configurada", $"La alarma se activará a las {alarmTime:HH:mm}", "OK");
     }
 }

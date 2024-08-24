@@ -36,7 +36,7 @@ namespace PayRemind
             builder.Logging.AddDebug();
 #endif
 
-            builder.Services.AddNotifications();
+            //builder.Services.AddNotifications();
 
             builder.Services.AddJob(typeof(MyBackgroundJob));
 

@@ -140,7 +140,6 @@
         <PackageReference Include="Shiny.Core" Version="3.3.3" />
         <PackageReference Include="Shiny.Hosting.Maui" Version="3.3.3" />
         <PackageReference Include="Shiny.Jobs" Version="3.3.3" />
-        <PackageReference Include="Shiny.Notifications" Version="3.3.3" />
         <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 		
     </ItemGroup>

@@ -32,6 +32,33 @@ namespace PayRemind.MauiWrapper
                 guideView?.Show();
             }
         }
+
+
+
+        public static void ShowGuideView(Android.Views.View targetView1,string title1, string content1)
+        {
+            Android.App.Activity? activity = Platform.CurrentActivity;
+
+            if (activity is not null)
+            {
+                GuideView.Builder? guideViewBuilder = new GuideView.Builder(activity)
+                    ?.SetGravity(Gravity.Auto)
+                    ?.SetDismissType(DismissType.Anywhere)
+                    ?.SetPointerType(PointerType.Circle);
+
+                // Configuración del primer paso
+                guideViewBuilder
+                    ?.SetTitle(title1)
+                    ?.SetContentText(content1)
+                    ?.SetTargetView(targetView1);
+
+                // Construir y mostrar el primer paso
+                GuideView? guideView = guideViewBuilder?.Build();
+                guideView?.Show();
+            }
+        }
+
+
     }
 
     public class GuideListener : Java.Lang.Object, IGuideListener

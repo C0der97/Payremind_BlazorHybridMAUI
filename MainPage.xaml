@@ -40,7 +40,7 @@
             CornerRadius="30"
             WidthRequest="60"
             HeightRequest="60"
-            AbsoluteLayout.LayoutBounds="1, 1, AutoSize, AutoSize"
+            AbsoluteLayout.LayoutBounds="1, 0.9, AutoSize, AutoSize"
             AbsoluteLayout.LayoutFlags="PositionProportional"
                         Clicked="FabButton_Clicked"
             />

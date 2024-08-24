@@ -16,14 +16,14 @@ namespace PayRemind
         ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | 
         ConfigChanges.Density)]
 
-    [IntentFilter(
-      new[] {
-            Shiny.ShinyNotificationIntents.NotificationClickAction
-                  },
-                  Categories = new[] {
-                      "android.intent.category.DEFAULT"
-                  }
-  )]
+  //  [IntentFilter(
+  //    new[] {
+  //          Shiny.ShinyNotificationIntents.NotificationClickAction
+  //                },
+  //                Categories = new[] {
+  //                    "android.intent.category.DEFAULT"
+  //                }
+  //)]
     public class MainActivity : MauiAppCompatActivity
     {
         public static MainActivity? ActivityCurrent { get; set; }

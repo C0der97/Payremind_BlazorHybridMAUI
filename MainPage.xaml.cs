@@ -3,13 +3,17 @@ using Android.Content;
 using Android.OS;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.JSInterop;
+using PayRemind.Contracts;
 using PayRemind.Data;
-using PayRemind.Jobs.MyJob;
+using PayRemind.MauiWrapper;
+
+//using PayRemind.Jobs.MyJob;
 using PayRemind.Messages;
+using PayRemind.Pages;
 using Shiny.Jobs;
-using Shiny.Notifications;
+//using Shiny.Notifications;
 using Application = Microsoft.Maui.Controls.Application;
-using Notification = Shiny.Notifications.Notification;
+//using Notification = Shiny.Notifications.Notification;
 
 namespace PayRemind
 {
@@ -22,17 +26,24 @@ namespace PayRemind
 
         private bool _isInitialized = false;
 
-        private readonly INotificationManager _notificationManager;
+
+        private CustomTooltip? _myTooltip;
 
 
-        public MainPage(INotificationManager notificationManager, IJobManager jobManager)
+
+        public MainPage( IJobManager jobManager)
         {
             InitializeComponent();
 
-            _notificationManager = notificationManager;
 
+            _myTooltip = new CustomTooltip
+            {
+                Title = "Presiona este botón para crear un recordatorio",
+                Text = "Este botón abrira un formulario",
+                IsVisible = true,
+            };
 
-
+    
 
 
             if (currentTheme == AppTheme.Light)
@@ -167,24 +178,29 @@ namespace PayRemind
             base.OnAppearing();
 
 
-            Channel channel = new Channel
-            {
-                Identifier = "alarms_notif",
-                Description = "Channel",
-                Importance = ChannelImportance.High,
-                Actions = new List<ChannelAction>()
-                {
-                    new ChannelAction()
-                    {
-                        Identifier = "alarm_btn",
-                        Title = "action_alarm",
-                        ActionType = ChannelActionType.OpenApp
-                    }
-                }
-            };
+
+            FabButton.SizeChanged += OnButtonSizeChanged;
 
 
-            _notificationManager.AddChannel(channel);
+
+            //Channel channel = new Channel
+            //{
+            //    Identifier = "alarms_notif",
+            //    Description = "Channel",
+            //    Importance = ChannelImportance.High,
+            //    Actions = new List<ChannelAction>()
+            //    {
+            //        new ChannelAction()
+            //        {
+            //            Identifier = "alarm_btn",
+            //            Title = "action_alarm",
+            //            ActionType = ChannelActionType.OpenApp
+            //        }
+            //    }
+            //};
+
+
+            //_notificationManager.AddChannel(channel);
 
             if (!_isInitialized)
             {
@@ -212,6 +228,63 @@ namespace PayRemind
 
 #endif
         }
+
+
+        private void OnButtonSizeChanged(object sender, EventArgs e)
+        {
+
+            if (FabButton.Width > 0 && FabButton.Height > 0)
+            {
+                Dispatcher.Dispatch(async () =>
+                {
+                    if (!FabButton.IsVisible) return;
+
+                    await ShowFeatureHighlight();
+
+
+                    //_myTooltip.ShowAt(MyButton, offsetY: 10, offsetX: 0);
+                });
+
+                // Desuscribirse del evento si no es necesario más
+                FabButton.SizeChanged -= OnButtonSizeChanged;
+            }
+        }
+
+
+        private async Task ShowFeatureHighlight(Button btn = null)
+        {
+            // Asegúrate de que estás ejecutando esto en el hilo de la UI
+
+            // Necesitamos la vista de Android para pasársela al servicio
+
+#if ANDROID
+            // Asegúrate de que el botón esté completamente cargado
+            //var platformButton = MyButton.ToPlatform(this.Handler.MauiContext);
+
+            //var activity = Platform.CurrentActivity;
+            //Microsoft.Maui.Controls.View nativeView = MyButton;
+
+            // showCaseService.ShowFeatureHighlight(nativeView.Id, "Guide Title", "Guide Description");
+
+            await Task.Delay(100);
+
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+
+                var viewConverterService = DependencyService.Get<IViewConverterService>();
+
+                Android.Views.View nativeView = viewConverterService.GetNativeView(FabButton);
+
+                if (nativeView != null)
+                {
+                    ShowCaseViewWrapper.ShowGuideView(nativeView, "Presiona este botón para crear un recordatorio", "Este botón abrira un formulario");
+                }
+
+            }
+
+#endif
+        }
+
 
 
         private void Initialize()
@@ -277,7 +350,7 @@ namespace PayRemind
 
         private async Task OnSendNotificationClicked()
         {
-            Shiny.AccessState result = await _notificationManager.RequestAccess(AccessRequestFlags.Notification);
+            //Shiny.AccessState result = await _notificationManager.RequestAccess(AccessRequestFlags.Notification);
 
 
 
@@ -297,26 +370,26 @@ namespace PayRemind
             // Informar al usuario
             //await DisplayAlert("Información", "Trabajo en segundo plano iniciado", "OK");
 
-            int uniId = unchecked((int)DateTime.Now.Ticks);
+            //int uniId = unchecked((int)DateTime.Now.Ticks);
 
-            Notification notification = new()
-            {
-                Channel = "alarms_notif",
-                Id = unchecked((int)DateTime.Now.Ticks),
-                Title = "Título de la notificación",
-                Message = "Este es el cuerpo de la notificación",
-                BadgeCount = 0,
-                Thread = "Group",
-                ScheduleDate = DateTime.Now.AddSeconds(2)
-            };
-
-
-              await _notificationManager.Send(notification);
-
-            Task<IList<Notification>> nots = _notificationManager.GetPendingNotifications();
+            //Notification notification = new()
+            //{
+            //    Channel = "alarms_notif",
+            //    Id = unchecked((int)DateTime.Now.Ticks),
+            //    Title = "Título de la notificación",
+            //    Message = "Este es el cuerpo de la notificación",
+            //    BadgeCount = 0,
+            //    Thread = "Group",
+            //    ScheduleDate = DateTime.Now.AddSeconds(2)
+            //};
 
 
-            var not =  await _notificationManager.GetNotification(uniId);
+            //  await _notificationManager.Send(notification);
+
+            //Task<IList<Notification>> nots = _notificationManager.GetPendingNotifications();
+
+
+            //var not =  await _notificationManager.GetNotification(uniId);
 
         }
     }

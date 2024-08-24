@@ -4,9 +4,9 @@ using Android.OS;
 using CommunityToolkit.Maui.Alerts;
 using Shiny;
 using Shiny.Jobs;
-using Shiny.Notifications;
+//using Shiny.Notifications;
 using Application = Microsoft.Maui.Controls.Application;
-using Notification = Shiny.Notifications.Notification;
+//using Notification = Shiny.Notifications.Notification;
 
 namespace PayRemind
 {
@@ -15,16 +15,16 @@ namespace PayRemind
 
         public static bool AppActive = false;
 
-        public INotificationManager NotificationManager { get; set; }
+        //public INotificationManager NotificationManager { get; set; }
 
-        public App(INotificationManager notificationManager, IJobManager jobManager)
+        public App(/*INotificationManager notificationManager, */IJobManager jobManager)
         {
             InitializeComponent();
 
-            NotificationManager = notificationManager;
+            //NotificationManager = notificationManager;
 
 
-            MainPage = new MainPage(notificationManager, jobManager);
+            MainPage = new MainPage(jobManager);
         }
 
         protected override async void OnStart()
@@ -54,16 +54,30 @@ namespace PayRemind
 #if ANDROID
             Android.App.Activity? context = Platform.CurrentActivity;
                         string? packageName = context?.PackageName ?? "";
-                        PowerManager? powerManager = context?.GetSystemService(Context.PowerService) as PowerManager;
 
-                        if (powerManager != null && !powerManager.IsIgnoringBatteryOptimizations(packageName))
-                        {
-                            var intent = new Intent();
-                            intent?.SetAction(Android.Provider.Settings.ActionRequestIgnoreBatteryOptimizations);
-                            intent?.SetData(Android.Net.Uri.Parse($"package:{packageName}"));
-                            context?.StartActivity(intent);
-                        }
-            #endif
+            if (context?.GetSystemService(Context.PowerService) is PowerManager powerManager && !powerManager.IsIgnoringBatteryOptimizations(packageName))
+            {
+                var intent = new Intent();
+                intent?.SetAction(Android.Provider.Settings.ActionRequestIgnoreBatteryOptimizations);
+                intent?.SetData(Android.Net.Uri.Parse($"package:{packageName}"));
+                context?.StartActivity(intent);
+            }
+
+
+            if (OperatingSystem.IsAndroidVersionAtLeast(31)) // Android 12 y superior
+            {
+                if (context?.GetSystemService(Context.AlarmService) is AlarmManager alarmManager && !alarmManager.CanScheduleExactAlarms() && MainPage != null)
+                {
+                    // Necesitamos solicitar permiso al usuario
+                    var intent = new Intent(Android.Provider.Settings.ActionRequestScheduleExactAlarm);
+                    intent.AddFlags(ActivityFlags.NewTask);
+                    context?.StartActivity(intent);
+                    await MainPage?.DisplayAlert("Permiso requerido", "Por favor, otorga permiso para programar alarmas exactas en la siguiente pantalla.", "OK");
+                    return;
+                }
+            }
+
+#endif
         }
 
         //        protected override Window CreateWindow(IActivationState activationState)

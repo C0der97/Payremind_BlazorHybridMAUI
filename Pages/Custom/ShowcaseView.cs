@@ -13,6 +13,7 @@ namespace PayRemind.Pages.Custom
         private Border _highlightBorder;
         private ObservableCollection<ShowcaseItem> _showcaseItems;
         private int _currentIndex = 0;
+        private CancellationTokenSource _autoAdvanceCts;
 
         public event EventHandler Dismissed;
 
@@ -42,7 +43,7 @@ namespace PayRemind.Pages.Custom
             _highlightBorder = new Border
             {
                 Stroke = Colors.Yellow,
-                StrokeThickness = 4,
+                StrokeThickness = 2,
                 StrokeShape = new RoundRectangle
                 {
                     CornerRadius = new CornerRadius(8)
@@ -62,17 +63,10 @@ namespace PayRemind.Pages.Custom
             _layout.GestureRecognizers.Add(tapGesture);
         }
 
-        private async void OnTapped(object sender, EventArgs e)
+        private void OnTapped(object sender, EventArgs e)
         {
-            if (_currentIndex < _showcaseItems.Count - 1)
-            {
-                _currentIndex++;
-                await ShowCurrentItem();
-            }
-            else
-            {
-                Dismiss();
-            }
+            _autoAdvanceCts?.Cancel();
+            AdvanceShowcase();
         }
 
         public async Task Show()
@@ -102,33 +96,56 @@ namespace PayRemind.Pages.Custom
 
             await AnimateOpacity(_highlightBorder, 0, 1, 300);
 
+            _autoAdvanceCts = new CancellationTokenSource();
+
             ISnackbar snackbar = Snackbar.Make(item.Message,
-                        action: async () =>
-                        {
-                            if (_currentIndex < _showcaseItems.Count - 1)
-                            {
-                                _currentIndex++;
-                                await ShowCurrentItem();
-                            }
-                            else
-                            {
-                                Dismiss();
-                            }
+                action: () =>
+                {
+                    _autoAdvanceCts.Cancel(); // Cancel the auto-advance timer
+                    AdvanceShowcase();
+                },
+                actionButtonText: "OK",
+                duration: TimeSpan.FromSeconds(60),
+                visualOptions: new SnackbarOptions
+                {
+                    BackgroundColor = Colors.DarkViolet,
+                    TextColor = Colors.Yellow,
+                    ActionButtonTextColor = Colors.Yellow
+                });
 
-                            // Acción a realizar cuando se presiona el botón OK
-                            System.Diagnostics.Debug.WriteLine("Botón OK presionado");
-                        },
-                        actionButtonText: "OK",
-                        duration: TimeSpan.FromSeconds(60), // Duración larga para que no se cierre automáticamente
-                        visualOptions: new SnackbarOptions
-                        {
-                            BackgroundColor = Colors.DarkSalmon,
-                            TextColor = Colors.White,
-                            ActionButtonTextColor = Colors.White
-                        });
-
+            // Start the auto-advance timer
+            _ = AutoAdvanceAfterDelay(_autoAdvanceCts.Token);
 
             await snackbar.Show();
+        }
+
+        private async Task AutoAdvanceAfterDelay(CancellationToken cancellationToken)
+        {
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken);
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    MainThread.BeginInvokeOnMainThread(AdvanceShowcase);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // The task was cancelled, do nothing
+            }
+        }
+
+        private void AdvanceShowcase()
+        {
+            if (_currentIndex < _showcaseItems.Count - 1)
+            {
+                _currentIndex++;
+                MainThread.BeginInvokeOnMainThread(async () => await ShowCurrentItem());
+            }
+            else
+            {
+                Dismiss();
+            }
         }
 
         private async Task AnimateOpacity(VisualElement view, double start, double end, uint length)
